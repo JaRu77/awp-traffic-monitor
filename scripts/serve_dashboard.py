@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Serve the static dashboard in a local browser."""
+"""Serve the static dashboard and report files in a local browser."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DASHBOARD_DIR = PROJECT_ROOT / "reports" / "dashboard"
+REPORTS_DIR = PROJECT_ROOT / "reports"
 
 
 def main() -> int:
@@ -28,12 +28,13 @@ def main() -> int:
     if not args.no_generate:
         subprocess.run([sys.executable, str(PROJECT_ROOT / "scripts" / "make_dashboard.py")], check=True)
 
-    DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
-    handler = partial(SimpleHTTPRequestHandler, directory=str(DASHBOARD_DIR))
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    handler = partial(SimpleHTTPRequestHandler, directory=str(REPORTS_DIR))
     server = ThreadingHTTPServer((args.host, args.port), handler)
-    url = f"http://{args.host}:{args.port}/"
+    url = f"http://{args.host}:{args.port}/dashboard/"
 
     print(f"Pulpit monitoringu: {url}")
+    print("Mapa punktow: " + f"http://{args.host}:{args.port}/maps/awp_points.html")
     print("Zatrzymanie: Ctrl+C")
     if not args.no_open:
         webbrowser.open(url)
