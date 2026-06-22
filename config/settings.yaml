@@ -1,7 +1,7 @@
 project:
   name: "Monitoring warunkow ruchu na al. Wojska Polskiego w Szczecinie"
   timezone: "Europe/Warsaw"
-  measurement_interval_minutes: 60
+  measurement_interval_minutes: 15
 
 monitoring:
   enabled: true
