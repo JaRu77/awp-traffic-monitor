@@ -91,7 +91,7 @@ python -m pytest
 
 ## GitHub Actions
 
-Workflow `hourly.yml` uruchamia `scripts/fetch_traffic.py` 15 minut po kazdej pelnej godzinie, czyli wedlug harmonogramu `15 * * * *`, i moze byc uruchomiony recznie przez `workflow_dispatch`. Przy 24 punktach pomiarowych oznacza to okolo 576 zapytan dziennie, dlatego zostaje duzy zapas wzgledem limitu Freemium TomTom.
+Workflow `hourly.yml` uruchamia `scripts/fetch_traffic.py` co 15 minut, czyli wedlug harmonogramu `0,15,30,45 * * * *`, i moze byc uruchomiony recznie przez `workflow_dispatch`. Przy 24 punktach pomiarowych oznacza to okolo 2304 zapytan dziennie, czyli ponizej limitu referencyjnego 2500 zapytan dziennie.
 
 Po kazdym cyklu workflow generuje statyczny pulpit `reports/dashboard/index.html` oraz plik maszynowy `reports/dashboard/status.json`. Pulpit pokazuje liczbe requestow dzisiaj, zapas limitu, status ostatniego cyklu, ostatnie pomiary dla punktow i ostatnie uruchomienia skryptu.
 
@@ -156,13 +156,13 @@ Limit `daily_request_soft_limit` jest bezpiecznikiem. Jesli kolejny cykl mialby 
 Reczne zatrzymanie pojedynczego uruchomienia:
 
 ```text
-GitHub -> Actions -> Traffic fetch 15 minutes after each hour -> Cancel workflow
+GitHub -> Actions -> Traffic fetch every 15 minutes -> Cancel workflow
 ```
 
 Reczne uruchomienie:
 
 ```text
-GitHub -> Actions -> Traffic fetch 15 minutes after each hour -> Run workflow
+GitHub -> Actions -> Traffic fetch every 15 minutes -> Run workflow
 ```
 
 Do kontroli zuzycia API uzywaj jednoczesnie:
