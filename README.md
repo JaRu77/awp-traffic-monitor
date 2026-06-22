@@ -110,7 +110,13 @@ Albo z PowerShella:
 Adres domyslny:
 
 ```text
-http://127.0.0.1:8000/
+http://127.0.0.1:8000/dashboard/
+```
+
+Mapa punktow bedzie wtedy dostepna pod:
+
+```text
+http://127.0.0.1:8000/maps/awp_points.html
 ```
 
 Zostaw okno serwera otwarte. Zamkniecie okna zatrzymuje lokalny panel. Panel online z adresem WWW wymaga GitHub Pages albo innego hostingu statycznego.
