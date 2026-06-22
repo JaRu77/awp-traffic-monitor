@@ -1,0 +1,16 @@
+{
+  "date": "2026-06-22",
+  "generated_at": "2026-06-22 21:42:19",
+  "monitoring_enabled": true,
+  "points": 24,
+  "interval_minutes": 15,
+  "expected_daily_requests": 2304,
+  "request_total": 0,
+  "request_limit_reference": 2500,
+  "soft_limit": 2400,
+  "successful_requests_today": 0,
+  "errors_today": 0,
+  "latest_measurement": null,
+  "latest_run_status": null,
+  "worst_point": null
+}

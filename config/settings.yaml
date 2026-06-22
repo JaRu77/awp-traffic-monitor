@@ -1,0 +1,45 @@
+project:
+  name: "Monitoring warunkow ruchu na al. Wojska Polskiego w Szczecinie"
+  timezone: "Europe/Warsaw"
+  measurement_interval_minutes: 15
+
+monitoring:
+  enabled: true
+  daily_request_soft_limit: 2400
+  expected_points: 24
+
+tomtom:
+  endpoint_base: "https://api.tomtom.com/traffic/services/4/flowSegmentData"
+  style: "absolute"
+  zoom: 10
+  unit: "KMPH"
+  timeout_seconds: 20
+  request_delay_seconds: 0.3
+
+database:
+  path: "data/awp_traffic.sqlite"
+
+report:
+  title: "Dobowy raport warunkow ruchu"
+  output_dir: "reports/daily"
+  figures_dir: "reports/figures"
+  maps_dir: "reports/maps"
+  include_point_map: true
+  language: "pl"
+
+dashboard:
+  title: "Pulpit monitoringu AWP"
+  output_dir: "reports/dashboard"
+  refresh_seconds: 300
+  request_limit_reference: 2500
+
+thresholds:
+  low_confidence_below: 0.5
+  congestion_index:
+    free_flow_min: 0.85
+    light_slowdown_min: 0.65
+    significant_slowdown_min: 0.40
+  delay_ratio:
+    light_slowdown_min: 1.15
+    significant_slowdown_min: 1.50
+    severe_congestion_min: 2.00

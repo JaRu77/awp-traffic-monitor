@@ -1,0 +1,192 @@
+points:
+  - id: awp_p01_wjazd_od_placu_zwyciestwa
+    name: "Punkt 1 - Wjazd od Placu Zwyciestwa"
+    latitude: 53.4261406
+    longitude: 14.546218
+    direction: "Plac Zwyciestwa -> Plac Zgody"
+    location_description: "Wjazd od Placu Zwyciestwa."
+    corridor_order: 1
+
+  - id: awp_p02_miedzy_zgody_a_wjazdem
+    name: "Punkt 2 - Miedzy Placem Zgody a wjazdem"
+    latitude: 53.4272511
+    longitude: 14.5451662
+    direction: "Plac Zwyciestwa -> Plac Zgody"
+    location_description: "Miedzy Placem Zgody a wjazdem od Placu Zwyciestwa."
+    corridor_order: 2
+
+  - id: awp_p03_przed_rondem_plac_zgody
+    name: "Punkt 3 - Przed rondem Plac Zgody"
+    latitude: 53.4284542
+    longitude: 14.544053
+    direction: "Plac Zwyciestwa -> Plac Zgody"
+    location_description: "Przed rondem Plac Zgody od strony Placu Zwyciestwa."
+    corridor_order: 3
+
+  - id: awp_p04_wjazd_z_baluki
+    name: "Punkt 4 - Wjazd na Plac Zgody z Baluki"
+    latitude: 53.4288491
+    longitude: 14.5442334
+    direction: "Baluki -> Plac Zgody"
+    location_description: "Wjazd na Plac Zgody z ulicy Baluki."
+    corridor_order: 4
+
+  - id: awp_p05_zjazd_zgody_do_jagiellonskiej
+    name: "Punkt 5 - Zjazd z Placu Zgody w kierunku Jagiellonskiej"
+    latitude: 53.4291775
+    longitude: 14.5433724
+    direction: "Plac Zgody -> Jagiellonska"
+    location_description: "Zjazd z ronda Plac Zgody w kierunku Jagiellonskiej."
+    corridor_order: 5
+
+  - id: awp_p06_miedzy_zgody_jagiellonska
+    name: "Punkt 6 - Pomiedzy Plac Zgody i Jagiellonska"
+    latitude: 53.4303966
+    longitude: 14.5423856
+    direction: "Plac Zgody -> Jagiellonska"
+    location_description: "Odcinek pomiedzy Placem Zgody a Jagiellonska."
+    corridor_order: 6
+
+  - id: awp_p07_przed_jagiellonska
+    name: "Punkt 7 - Przed Jagiellonska"
+    latitude: 53.4313293
+    longitude: 14.5416835
+    direction: "Plac Zgody -> Jagiellonska"
+    location_description: "Przed skrzyzowaniem z Jagiellonska od strony Placu Zgody."
+    corridor_order: 7
+
+  - id: awp_p08_jagiellonska_szarych_posrodku
+    name: "Punkt 8 - Jagiellonska - Szarych Szeregow - posrodku"
+    latitude: 53.4320471
+    longitude: 14.5411119
+    direction: "Jagiellonska -> Plac Szarych Szeregow"
+    location_description: "Odcinek pomiedzy Jagiellonska a Placem Szarych Szeregow."
+    corridor_order: 8
+
+  - id: awp_p09_wyjazd_awp_szarych_szeregow
+    name: "Punkt 9 - Wyjazd z AWP w Szarych Szeregow"
+    latitude: 53.432813
+    longitude: 14.5405971
+    direction: "AWP -> Plac Szarych Szeregow"
+    location_description: "Wyjazd z AWP w rejonie ronda Plac Szarych Szeregow."
+    corridor_order: 9
+
+  - id: awp_p10_wjazd_awp_z_szarych_szeregow
+    name: "Punkt 10 - Wjazd w AWP z Szarych Szeregow"
+    latitude: 53.4326876
+    longitude: 14.5404576
+    direction: "Plac Szarych Szeregow -> AWP"
+    location_description: "Wjazd w AWP z ronda Plac Szarych Szeregow."
+    corridor_order: 10
+
+  - id: awp_p11_miedzy_szarych_a_jagiellonska
+    name: "Punkt 11 - Pomiedzy Szarych Szeregow a Jagiellonska"
+    latitude: 53.4319333
+    longitude: 14.5410317
+    direction: "Plac Szarych Szeregow -> Jagiellonska"
+    location_description: "Odcinek pomiedzy Placem Szarych Szeregow a Jagiellonska."
+    corridor_order: 11
+
+  - id: awp_p12_awp_jagiellonska_przed_skrzyzowaniem
+    name: "Punkt 12 - AWP-Jagiellonska przed skrzyzowaniem"
+    latitude: 53.4315929
+    longitude: 14.54132
+    direction: "Plac Szarych Szeregow -> Jagiellonska"
+    location_description: "AWP-Jagiellonska przed skrzyzowaniem."
+    corridor_order: 12
+
+  - id: awp_p13_jagiellonska_skrzyzowanie_awp
+    name: "Punkt 13 - Jagiellonska skrzyzowanie z AWP"
+    latitude: 53.4315034
+    longitude: 14.5410196
+    direction: "skrzyzowanie Jagiellonska/AWP"
+    location_description: "Jagiellonska, skrzyzowanie z AWP; punkt do weryfikacji dopasowania segmentu TomTom."
+    corridor_order: 13
+
+  - id: awp_p14_jagiellonska_za_skrzyzowaniem
+    name: "Punkt 14 - Jagiellonska za skrzyzowaniem z AWP"
+    latitude: 53.4314043
+    longitude: 14.5419771
+    direction: "Jagiellonska za skrzyzowaniem"
+    location_description: "Jagiellonska za skrzyzowaniem z AWP; punkt do weryfikacji dopasowania segmentu TomTom."
+    corridor_order: 14
+
+  - id: awp_p15_jagiellonska_zjazd
+    name: "Punkt 15 - Jagiellonska skrzyzowanie z AWP zjazd"
+    latitude: 53.4312589
+    longitude: 14.5415855
+    direction: "zjazd Jagiellonska/AWP"
+    location_description: "Jagiellonska, skrzyzowanie z AWP, zjazd; punkt do weryfikacji dopasowania segmentu TomTom."
+    corridor_order: 15
+
+  - id: awp_p16_jagiellonska_plac_zgody_posrodku
+    name: "Punkt 16 - Posrodku Jagiellonska - Plac Zgody"
+    latitude: 53.4303748
+    longitude: 14.5422256
+    direction: "Jagiellonska -> Plac Zgody"
+    location_description: "Odcinek pomiedzy Jagiellonska a Placem Zgody."
+    corridor_order: 16
+
+  - id: awp_p17_przed_zgody_od_szarych
+    name: "Punkt 17 - Przed Plac Zgody z kierunku Szarych Szeregow"
+    latitude: 53.4290468
+    longitude: 14.5433323
+    direction: "Jagiellonska -> Plac Zgody"
+    location_description: "Przed Placem Zgody z kierunku Placu Szarych Szeregow."
+    corridor_order: 17
+
+  - id: awp_p18_zjazd_zgody_boh_getta
+    name: "Punkt 18 - Zjazd z Placu Zgody Bohaterow Getta"
+    latitude: 53.4287751
+    longitude: 14.5430829
+    direction: "Plac Zgody -> Bohaterow Getta"
+    location_description: "Zjazd z Placu Zgody w ulice Bohaterow Getta Warszawskiego."
+    corridor_order: 18
+
+  - id: awp_p19_zjazd_zgody_boguslawa
+    name: "Punkt 19 - Zjazd z Placu Zgody w Boguslawa X"
+    latitude: 53.428406
+    longitude: 14.5435364
+    direction: "Plac Zgody -> Boguslawa X"
+    location_description: "Zjazd z Placu Zgody w ulice Boguslawa X."
+    corridor_order: 19
+
+  - id: awp_p20_wjazd_z_boguslawa
+    name: "Punkt 20 - Wjazd na rondo Plac Zgody ze strony Boguslawa X"
+    latitude: 53.4283676
+    longitude: 14.543637
+    direction: "Boguslawa X -> Plac Zgody"
+    location_description: "Wjazd na rondo Plac Zgody ze strony ulicy Boguslawa X."
+    corridor_order: 20
+
+  - id: awp_p21_wyjazd_zgody_w_awp
+    name: "Punkt 21 - Wyjazd z ronda Plac Zgody w AWP"
+    latitude: 53.4284112
+    longitude: 14.5439274
+    direction: "Plac Zgody -> Plac Zwyciestwa"
+    location_description: "Wyjazd z ronda Plac Zgody w AWP w kierunku Placu Zwyciestwa."
+    corridor_order: 21
+
+  - id: awp_p22_zgody_zwyciestwa_posrodku
+    name: "Punkt 22 - Plac Zgody - Plac Zwyciestwa - posrodku"
+    latitude: 53.4272455
+    longitude: 14.5450589
+    direction: "Plac Zgody -> Plac Zwyciestwa"
+    location_description: "Odcinek pomiedzy Placem Zgody a Placem Zwyciestwa."
+    corridor_order: 22
+
+  - id: awp_p23_wyjazd_awp_plac_zwyciestwa
+    name: "Punkt 23 - Wyjazd z AWP Plac Zwyciestwa"
+    latitude: 53.4261875
+    longitude: 14.545826
+    direction: "AWP -> Plac Zwyciestwa"
+    location_description: "Wyjazd z AWP w kierunku Placu Zwyciestwa."
+    corridor_order: 23
+
+  - id: awp_p24_z_placu_zgody_w_baluki
+    name: "Punkt 24 - Z Placu Zgody w Baluki"
+    latitude: 53.4288207
+    longitude: 14.5443331
+    direction: "Plac Zgody -> Baluki"
+    location_description: "Zjazd z Placu Zgody w ulice Baluki."
+    corridor_order: 24

@@ -1,0 +1,62 @@
+name: Daily traffic report
+
+on:
+  schedule:
+    - cron: "25 4 * * *"
+  workflow_dispatch:
+    inputs:
+      report_date:
+        description: "Report date in YYYY-MM-DD format. Empty means yesterday in Europe/Warsaw."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: awp-traffic-repo-writes
+  cancel-in-progress: false
+
+jobs:
+  daily-report:
+    runs-on: ubuntu-latest
+    env:
+      TOMTOM_API_KEY: ${{ secrets.TOMTOM_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate daily report
+        run: |
+          if [ -n "${{ inputs.report_date }}" ]; then
+            python scripts/make_daily_report.py --date "${{ inputs.report_date }}"
+          else
+            python scripts/make_daily_report.py --days-back 1
+          fi
+
+      - name: Generate dashboard
+        run: python scripts/make_dashboard.py
+
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports
+          if git diff --cached --quiet; then
+            echo "No report changes to commit."
+          else
+            git commit -m "Generate daily traffic report"
+            git pull --rebase
+            git push
+          fi
