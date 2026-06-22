@@ -91,7 +91,7 @@ python -m pytest
 
 ## GitHub Actions
 
-Workflow `hourly.yml` uruchamia `scripts/fetch_traffic.py` testowo co 15 minut, w minutach 7, 22, 37 i 52 kazdej godziny, i moze byc uruchomiony recznie przez `workflow_dispatch`. Przy 24 punktach pomiarowych oznacza to okolo 2304 zapytan dziennie, dlatego warto kontrolowac zuzycie w panelu TomTom Analytics.
+Workflow `hourly.yml` uruchamia `scripts/fetch_traffic.py` o pelnej godzinie, czyli wedlug harmonogramu `0 * * * *`, i moze byc uruchomiony recznie przez `workflow_dispatch`. Przy 24 punktach pomiarowych oznacza to okolo 576 zapytan dziennie, dlatego zostaje duzy zapas wzgledem limitu Freemium TomTom.
 
 Po kazdym cyklu workflow generuje statyczny pulpit `reports/dashboard/index.html` oraz plik maszynowy `reports/dashboard/status.json`. Pulpit pokazuje liczbe requestow dzisiaj, zapas limitu, status ostatniego cyklu, ostatnie pomiary dla punktow i ostatnie uruchomienia skryptu.
 
