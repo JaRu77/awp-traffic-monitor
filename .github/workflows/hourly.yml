@@ -1,8 +1,8 @@
-name: Traffic fetch 15 minutes after each hour
+name: Traffic fetch every 15 minutes
 
 on:
   schedule:
-    - cron: "15 * * * *"
+    - cron: "0,15,30,45 * * * *"
   workflow_dispatch:
 
 permissions:
