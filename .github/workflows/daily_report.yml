@@ -54,7 +54,9 @@ jobs:
         run: python scripts/make_dashboard.py
 
       - name: Commit report
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports
@@ -62,5 +64,26 @@ jobs:
             echo "No report changes to commit."
           else
             git commit -m "Generate daily traffic report"
-            git push
+            if git push; then
+              echo "Daily report pushed."
+            else
+              echo "Initial push failed; retrying from latest origin/main without merging generated reports."
+              backup_dir="$(mktemp -d)"
+              mkdir -p "$backup_dir/reports"
+              cp -R reports/. "$backup_dir/reports/" 2>/dev/null || true
+
+              git fetch origin main
+              git reset --hard origin/main
+
+              mkdir -p reports
+              cp -R "$backup_dir/reports/." reports/ 2>/dev/null || true
+
+              git add reports
+              if git diff --cached --quiet; then
+                echo "No report changes to commit after retry."
+              else
+                git commit -m "Generate daily traffic report"
+                git push
+              fi
+            fi
           fi
