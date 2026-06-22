@@ -26,6 +26,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync latest repository data
+        run: git pull --ff-only
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -57,6 +62,6 @@ jobs:
             echo "No report changes to commit."
           else
             git commit -m "Generate daily traffic report"
-            git pull --rebase
+            git pull --rebase --autostash
             git push
           fi
