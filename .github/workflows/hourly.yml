@@ -60,7 +60,6 @@ jobs:
             echo "No traffic data changes to commit."
           else
             git commit -m "Collect traffic data"
-            git pull --rebase --autostash
             git push
           fi
 
