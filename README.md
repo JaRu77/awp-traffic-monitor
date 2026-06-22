@@ -91,9 +91,29 @@ python -m pytest
 
 ## GitHub Actions
 
-Workflow `hourly.yml` uruchamia `scripts/fetch_traffic.py` o pelnej godzinie, czyli wedlug harmonogramu `0 * * * *`, i moze byc uruchomiony recznie przez `workflow_dispatch`. Przy 24 punktach pomiarowych oznacza to okolo 576 zapytan dziennie, dlatego zostaje duzy zapas wzgledem limitu Freemium TomTom.
+Workflow `hourly.yml` uruchamia `scripts/fetch_traffic.py` 15 minut po kazdej pelnej godzinie, czyli wedlug harmonogramu `15 * * * *`, i moze byc uruchomiony recznie przez `workflow_dispatch`. Przy 24 punktach pomiarowych oznacza to okolo 576 zapytan dziennie, dlatego zostaje duzy zapas wzgledem limitu Freemium TomTom.
 
 Po kazdym cyklu workflow generuje statyczny pulpit `reports/dashboard/index.html` oraz plik maszynowy `reports/dashboard/status.json`. Pulpit pokazuje liczbe requestow dzisiaj, zapas limitu, status ostatniego cyklu, ostatnie pomiary dla punktow i ostatnie uruchomienia skryptu.
+
+Lokalny podglad pulpitu w przegladarce dziala dopiero po uruchomieniu lokalnego serwera. Najprosciej uruchom plik:
+
+```text
+start_dashboard.cmd
+```
+
+Albo z PowerShella:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\serve_dashboard.py
+```
+
+Adres domyslny:
+
+```text
+http://127.0.0.1:8000/
+```
+
+Zostaw okno serwera otwarte. Zamkniecie okna zatrzymuje lokalny panel. Panel online z adresem WWW wymaga GitHub Pages albo innego hostingu statycznego.
 
 Workflow `daily_report.yml` generuje raport dobowy raz dziennie i rowniez obsluguje `workflow_dispatch`. Dla uruchomienia recznego mozna podac date raportu w formacie `YYYY-MM-DD`; puste pole oznacza poprzedni dzien wzgledem strefy Europe/Warsaw.
 
@@ -136,13 +156,13 @@ Limit `daily_request_soft_limit` jest bezpiecznikiem. Jesli kolejny cykl mialby 
 Reczne zatrzymanie pojedynczego uruchomienia:
 
 ```text
-GitHub -> Actions -> Traffic fetch every 15 minutes -> Cancel workflow
+GitHub -> Actions -> Traffic fetch 15 minutes after each hour -> Cancel workflow
 ```
 
 Reczne uruchomienie:
 
 ```text
-GitHub -> Actions -> Traffic fetch every 15 minutes -> Run workflow
+GitHub -> Actions -> Traffic fetch 15 minutes after each hour -> Run workflow
 ```
 
 Do kontroli zuzycia API uzywaj jednoczesnie:
