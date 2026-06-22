@@ -52,7 +52,9 @@ jobs:
 
       - name: Commit collected data
         if: always()
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/awp_traffic.sqlite data/raw reports/dashboard reports/maps
@@ -60,7 +62,34 @@ jobs:
             echo "No traffic data changes to commit."
           else
             git commit -m "Collect traffic data"
-            git push
+            if git push; then
+              echo "Traffic data pushed."
+            else
+              echo "Initial push failed; retrying from latest origin/main without merging SQLite."
+              backup_dir="$(mktemp -d)"
+              mkdir -p "$backup_dir/raw" "$backup_dir/dashboard" "$backup_dir/maps"
+              cp data/awp_traffic.sqlite "$backup_dir/awp_traffic.sqlite"
+              cp -R data/raw/. "$backup_dir/raw/" 2>/dev/null || true
+              cp -R reports/dashboard/. "$backup_dir/dashboard/" 2>/dev/null || true
+              cp -R reports/maps/. "$backup_dir/maps/" 2>/dev/null || true
+
+              git fetch origin main
+              git reset --hard origin/main
+
+              mkdir -p data/raw reports/dashboard reports/maps
+              cp "$backup_dir/awp_traffic.sqlite" data/awp_traffic.sqlite
+              cp -R "$backup_dir/raw/." data/raw/ 2>/dev/null || true
+              cp -R "$backup_dir/dashboard/." reports/dashboard/ 2>/dev/null || true
+              cp -R "$backup_dir/maps/." reports/maps/ 2>/dev/null || true
+
+              git add data/awp_traffic.sqlite data/raw reports/dashboard reports/maps
+              if git diff --cached --quiet; then
+                echo "No traffic data changes to commit after retry."
+              else
+                git commit -m "Collect traffic data"
+                git push
+              fi
+            fi
           fi
 
       - name: Fail job if fetch failed
