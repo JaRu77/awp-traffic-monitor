@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -48,8 +49,12 @@ def main() -> int:
     report_settings = settings.get("report", {})
     dashboard_settings = settings.get("dashboard", {})
     maps_dir = PROJECT_ROOT / report_settings.get("maps_dir", "reports/maps")
+    dashboard_dir = PROJECT_ROOT / dashboard_settings.get("output_dir", "reports/dashboard")
     if not args.skip_map:
-        create_points_map(points, maps_dir / "awp_points.html")
+        map_path = create_points_map(points, maps_dir / "awp_points.html")
+        dashboard_maps_dir = dashboard_dir / "maps"
+        dashboard_maps_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(map_path, dashboard_maps_dir / "awp_points.html")
 
     html_path, json_path = generate_dashboard(
         date_iso=date_iso,
@@ -59,7 +64,7 @@ def main() -> int:
         fetch_runs=get_fetch_runs_for_date(db_path, date_iso, limit=32),
         latest_run=get_latest_fetch_run(db_path),
         request_total=get_daily_request_total(db_path, date_iso),
-        output_dir=PROJECT_ROOT / dashboard_settings.get("output_dir", "reports/dashboard"),
+        output_dir=dashboard_dir,
     )
     print(f"Pulpit HTML: {html_path}")
     print(f"Status JSON: {json_path}")
