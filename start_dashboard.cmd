@@ -22,8 +22,8 @@ if errorlevel 1 (
 
 echo.
 echo Pulpit monitoringu:
-echo http://127.0.0.1:8000/
+echo http://127.0.0.1:8000/dashboard/
 echo.
 echo Zostaw to okno otwarte. Zamkniecie okna zatrzyma panel.
-start "" "http://127.0.0.1:8000/"
-".venv\Scripts\python.exe" -m http.server 8000 --bind 127.0.0.1 --directory reports\dashboard
+start "" "http://127.0.0.1:8000/dashboard/"
+".venv\Scripts\python.exe" -m http.server 8000 --bind 127.0.0.1 --directory reports
