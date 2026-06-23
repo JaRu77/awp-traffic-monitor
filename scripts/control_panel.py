@@ -233,6 +233,9 @@ def _render_home(last_action: dict[str, str] | None) -> str:
       {_card("Requesty dzis", f"{status.get('request_total', 'brak')} / {status.get('request_limit_reference', 2500)}", "ok")}
       {_card("Punkty", status.get("points", "brak"), "ok")}
       {_card("Bledy dzis", status.get("errors_today", "brak"), "ok" if status.get("errors_today", 0) == 0 else "warn")}
+      {_card("Sloty dzis", f"{status.get('completed_slots_today', 'brak')} / {status.get('expected_slots_so_far', 'brak')}", "ok" if status.get("missing_slots_so_far", 0) == 0 else "warn")}
+      {_card("Braki slotow", status.get("missing_slots_so_far", "brak"), "ok" if status.get("missing_slots_so_far", 0) == 0 else "bad")}
+      {_card("Wiek danych", _age_label(status.get("stale_minutes")), "ok" if _stale_ok(status.get("stale_minutes")) else "bad")}
       {_card("Slot pomiaru", _short_time(status.get("latest_scheduled_slot") or status.get("latest_measurement")), "ok")}
       {_card("Pobrano", _short_time(status.get("latest_measurement")), "ok")}
     </div>
@@ -332,6 +335,19 @@ def _short_time(value: object) -> str:
         date_part, time_part = text.split("T", 1)
         return f"{date_part} {time_part[:5]}"
     return text[:16]
+
+
+def _age_label(value: object) -> str:
+    if value is None:
+        return "brak"
+    return f"{value} min"
+
+
+def _stale_ok(value: object) -> bool:
+    try:
+        return int(value) <= 30
+    except (TypeError, ValueError):
+        return False
 
 
 if __name__ == "__main__":

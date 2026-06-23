@@ -93,14 +93,16 @@ python -m pytest
 
 ## GitHub Actions
 
-Workflow `hourly.yml` uruchamia `scripts/fetch_traffic.py` co 15 minut, czyli wedlug harmonogramu `0,15,30,45 * * * *`, i moze byc uruchomiony recznie przez `workflow_dispatch`. Przy 24 punktach pomiarowych oznacza to okolo 2304 zapytan dziennie, czyli ponizej limitu referencyjnego 2500 zapytan dziennie.
+Workflow `hourly.yml` dziala jako watchdog co 5 minut wedlug harmonogramu `*/5 * * * *`, ale zapisuje dane do 15-minutowych slotow pomiarowych. Jesli slot, np. `06:30`, jest juz kompletny dla wszystkich punktow, kolejne uruchomienie nie odpytuje TomTom API i nie zuzywa limitu.
+
+Przy 24 punktach pomiarowych i kompletnych slotach co 15 minut plan wynosi okolo 2304 zapytan dziennie, czyli ponizej limitu referencyjnego 2500 zapytan dziennie.
 
 GitHub Actions moze uruchomic zaplanowany cykl z opoznieniem kilku minut. Dlatego baza zapisuje dwa rodzaje czasu:
 
 - `measurement_slot_local` / `scheduled_slot_local` - planowany slot badawczy, np. `06:30`;
 - `timestamp_local` / `started_at_local` - faktyczny czas pobrania, np. `06:38`.
 
-Do analiz godzinowych i raportow uzywany jest slot badawczy. Faktyczny czas zostaje w bazie jako informacja kontrolna.
+Do analiz godzinowych i raportow uzywany jest slot badawczy. Faktyczny czas zostaje w bazie jako informacja kontrolna. Jesli GitHub Actions nie uruchomi zadania przez dluzszy czas, brakujace sloty sa widoczne w pulpicie jako `Braki slotow`; takich luk nie nalezy ukrywac w analizie.
 
 Po kazdym cyklu workflow generuje statyczny pulpit `reports/dashboard/index.html` oraz plik maszynowy `reports/dashboard/status.json`. Pulpit pokazuje liczbe requestow dzisiaj, zapas limitu, status ostatniego cyklu, ostatnie pomiary dla punktow i ostatnie uruchomienia skryptu.
 

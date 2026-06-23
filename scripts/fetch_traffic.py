@@ -21,6 +21,7 @@ if str(SRC_DIR) not in sys.path:
 from awp_traffic.database import (
     create_fetch_run,
     get_daily_request_total,
+    get_measurement_point_ids_for_slot,
     insert_measurement,
     update_fetch_run,
     upsert_points,
@@ -59,8 +60,20 @@ def main() -> int:
     started_local = started_utc.astimezone(local_zone)
     scheduled_slot_utc = _floor_to_interval(started_utc, interval_minutes)
     scheduled_slot_local = scheduled_slot_utc.astimezone(local_zone)
+    scheduled_slot_local_text = scheduled_slot_local.isoformat()
+    scheduled_slot_utc_text = scheduled_slot_utc.isoformat()
     local_date = started_local.date().isoformat()
     daily_requests_before = get_daily_request_total(db_path, local_date)
+    existing_point_ids = (
+        get_measurement_point_ids_for_slot(db_path, scheduled_slot_local_text)
+        if not args.dry_run
+        else set()
+    )
+    remaining_points = [
+        point
+        for point in sorted_points
+        if point["id"] not in existing_point_ids
+    ]
     should_log_run = not args.dry_run or args.log_dry_run
     run_id: int | None = None
 
@@ -70,8 +83,8 @@ def main() -> int:
             {
                 "started_at_utc": started_utc.isoformat(),
                 "started_at_local": started_local.isoformat(),
-                "scheduled_slot_utc": scheduled_slot_utc.isoformat(),
-                "scheduled_slot_local": scheduled_slot_local.isoformat(),
+                "scheduled_slot_utc": scheduled_slot_utc_text,
+                "scheduled_slot_local": scheduled_slot_local_text,
                 "finished_at_utc": None,
                 "finished_at_local": None,
                 "status": "started",
@@ -97,14 +110,23 @@ def main() -> int:
     if (
         daily_request_soft_limit is not None
         and not args.dry_run
-        and daily_requests_before + len(sorted_points) > daily_request_soft_limit
+        and daily_requests_before + len(remaining_points) > daily_request_soft_limit
     ):
         message = (
             "Pominieto cykl, bo przekroczylby dzienny limit miekki: "
-            f"{daily_requests_before} + {len(sorted_points)} > {daily_request_soft_limit}."
+            f"{daily_requests_before} + {len(remaining_points)} > {daily_request_soft_limit}."
         )
         print(message)
         _finish_run(db_path, run_id, local_zone, "skipped_limit", 0, 0, 0, message)
+        return 0
+
+    if not remaining_points and not args.dry_run:
+        message = (
+            "Slot pomiarowy jest juz kompletny: "
+            f"{scheduled_slot_local_text}. Nie zuzyto API."
+        )
+        print(message)
+        _finish_run(db_path, run_id, local_zone, "skipped_complete", 0, 0, 0, message)
         return 0
 
     if not args.dry_run:
@@ -127,7 +149,7 @@ def main() -> int:
     successes = 0
     failures = 0
     requests_attempted = 0
-    for index, point in enumerate(sorted_points):
+    for index, point in enumerate(remaining_points):
         if index > 0 and request_delay_seconds > 0:
             time.sleep(request_delay_seconds)
         try:
@@ -144,8 +166,8 @@ def main() -> int:
             if timestamp_utc.tzinfo is None:
                 timestamp_utc = timestamp_utc.replace(tzinfo=timezone.utc)
             measurement["timestamp_local"] = timestamp_utc.astimezone(local_zone).isoformat()
-            measurement["measurement_slot_utc"] = scheduled_slot_utc.isoformat()
-            measurement["measurement_slot_local"] = scheduled_slot_local.isoformat()
+            measurement["measurement_slot_utc"] = scheduled_slot_utc_text
+            measurement["measurement_slot_local"] = scheduled_slot_local_text
 
             metrics = calculate_metrics(
                 measurement["current_speed"],
@@ -181,7 +203,8 @@ def main() -> int:
         status = "partial"
     else:
         status = "failed"
-    message = f"Sukcesy: {successes}, bledy: {failures}."
+    skipped_existing = len(existing_point_ids)
+    message = f"Sukcesy: {successes}, bledy: {failures}, pominiete istniejace: {skipped_existing}."
     _finish_run(db_path, run_id, local_zone, status, requests_attempted, successes, failures, message)
     print(f"Zakonczono pobieranie. Sukcesy: {successes}, bledy: {failures}.")
     return 1 if successes == 0 and failures > 0 else 0

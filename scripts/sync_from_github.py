@@ -103,6 +103,9 @@ def _print_status_summary(status_path: Path) -> None:
     print(f"  data: {status.get('date', 'brak')}")
     print(f"  status ostatniego cyklu: {status.get('latest_run_status', 'brak')}")
     print(f"  requesty dzis: {status.get('request_total', 'brak')}")
+    print(f"  sloty dzis: {status.get('completed_slots_today', 'brak')} / {status.get('expected_slots_so_far', 'brak')}")
+    print(f"  braki slotow: {status.get('missing_slots_so_far', 'brak')}")
+    print(f"  wiek danych: {_age_label(status.get('stale_minutes'))}")
     slot = status.get("latest_scheduled_slot") or status.get("latest_measurement")
     print(f"  slot pomiaru: {_short_time(slot)}")
     print(f"  pobrano faktycznie: {_short_time(status.get('latest_measurement'))}")
@@ -116,6 +119,12 @@ def _short_time(value: object) -> str:
         date_part, time_part = text.split("T", 1)
         return f"{date_part} {time_part[:5]}"
     return text[:16]
+
+
+def _age_label(value: object) -> str:
+    if value is None:
+        return "brak"
+    return f"{value} min"
 
 
 if __name__ == "__main__":

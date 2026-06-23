@@ -7,6 +7,7 @@ from datetime import datetime
 from html import escape
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from awp_traffic.metrics import interpret_conditions
 
@@ -30,6 +31,8 @@ def generate_dashboard(
     dashboard_settings = settings.get("dashboard", {})
     monitoring_settings = settings.get("monitoring", {})
     project_settings = settings.get("project", {})
+    timezone_name = project_settings.get("timezone", "Europe/Warsaw")
+    local_zone = ZoneInfo(timezone_name)
     title = dashboard_settings.get("title", "Pulpit monitoringu AWP")
     refresh_seconds = int(dashboard_settings.get("refresh_seconds", 300))
     request_limit_reference = int(dashboard_settings.get("request_limit_reference", 2500))
@@ -38,13 +41,18 @@ def generate_dashboard(
     interval_minutes = int(project_settings.get("measurement_interval_minutes", 15))
     expected_runs = int((24 * 60) / interval_minutes) if interval_minutes > 0 else 0
     expected_daily_requests = len(points) * expected_runs
+    now_local = datetime.now(local_zone)
+    slot_count = _completed_slot_count(measurements, interval_minutes)
+    expected_slots_so_far = _expected_slots_so_far(date_iso, now_local, interval_minutes)
+    missing_slots_so_far = max(0, expected_slots_so_far - slot_count)
     latest_measurements = _latest_measurements_by_point(measurements)
     latest_timestamp = _latest_timestamp(measurements)
     latest_slot = _latest_slot(measurements, latest_run)
+    stale_minutes = _stale_minutes(latest_timestamp, now_local)
     errors_today = sum(int(run.get("failures") or 0) for run in fetch_runs)
     successful_requests_today = sum(int(run.get("successes") or 0) for run in fetch_runs)
     worst_point = _worst_latest_point(latest_measurements)
-    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    generated_at = now_local.strftime("%Y-%m-%d %H:%M:%S")
 
     status = {
         "date": date_iso,
@@ -58,6 +66,10 @@ def generate_dashboard(
         "soft_limit": soft_limit,
         "successful_requests_today": successful_requests_today,
         "errors_today": errors_today,
+        "completed_slots_today": slot_count,
+        "expected_slots_so_far": expected_slots_so_far,
+        "missing_slots_so_far": missing_slots_so_far,
+        "stale_minutes": stale_minutes,
         "latest_measurement": latest_timestamp,
         "latest_scheduled_slot": latest_slot,
         "latest_run_status": latest_run.get("status") if latest_run else None,
@@ -77,7 +89,12 @@ def generate_dashboard(
         request_total=request_total,
         request_limit_reference=request_limit_reference,
         soft_limit=soft_limit,
+        interval_minutes=interval_minutes,
         expected_daily_requests=expected_daily_requests,
+        slot_count=slot_count,
+        expected_slots_so_far=expected_slots_so_far,
+        missing_slots_so_far=missing_slots_so_far,
+        stale_minutes=stale_minutes,
         successful_requests_today=successful_requests_today,
         errors_today=errors_today,
         latest_timestamp=latest_timestamp,
@@ -106,7 +123,12 @@ def _build_html(
     request_total: int,
     request_limit_reference: int,
     soft_limit: int | None,
+    interval_minutes: int,
     expected_daily_requests: int,
+    slot_count: int,
+    expected_slots_so_far: int,
+    missing_slots_so_far: int,
+    stale_minutes: int | None,
     successful_requests_today: int,
     errors_today: int,
     latest_timestamp: str | None,
@@ -130,6 +152,9 @@ def _build_html(
         _card("Limit miekki", soft_limit_label, _usage_class(soft_pct)),
         _card("Punkty", str(len(points)), "ok"),
         _card("Bledy dzis", str(errors_today), "ok" if errors_today == 0 else "warn"),
+        _card("Sloty dzis", f"{slot_count} / {expected_slots_so_far}", "ok" if missing_slots_so_far == 0 else "warn"),
+        _card("Braki slotow", str(missing_slots_so_far), "ok" if missing_slots_so_far == 0 else "bad"),
+        _card("Wiek danych", _age_label(stale_minutes), _stale_class(stale_minutes, interval_minutes)),
         _card("Slot pomiaru", _short_datetime(latest_slot), "ok" if latest_slot else "warn"),
         _card("Pobrano faktycznie", _short_datetime(latest_timestamp), "ok" if latest_timestamp else "warn"),
         _card("Plan dzienny", str(expected_daily_requests), _usage_class(_percent(expected_daily_requests, request_limit_reference))),
@@ -208,6 +233,8 @@ def _build_html(
         Dzis zapisano {request_total} prob zapytan do TomTom. Plan dla obecnej konfiguracji to
         {expected_daily_requests} requestow na dobe. Limit referencyjny Freemium: {request_limit_reference};
         limit miekki projektu: {soft_limit_label}.
+        Wykonane sloty pomiarowe dzisiaj: {slot_count}; oczekiwane do tej chwili: {expected_slots_so_far};
+        braki: {missing_slots_so_far}.
       </div>
       <div class="bar"><div class="fill"></div></div>
     </section>
@@ -341,6 +368,66 @@ def _latest_timestamp(measurements: list[dict[str, Any]]) -> str | None:
     return max(timestamps) if timestamps else None
 
 
+def _completed_slot_count(measurements: list[dict[str, Any]], interval_minutes: int) -> int:
+    slots = set()
+    for row in measurements:
+        slot = row.get("measurement_slot_local")
+        if not slot:
+            slot = _floor_timestamp_text(row.get("timestamp_local"), interval_minutes)
+        if slot:
+            slots.add(str(slot)[:16])
+    return len(slots)
+
+
+def _expected_slots_so_far(date_iso: str, now_local: datetime, interval_minutes: int) -> int:
+    if interval_minutes <= 0:
+        return 0
+    try:
+        report_date = datetime.strptime(date_iso, "%Y-%m-%d").date()
+    except ValueError:
+        return 0
+    if report_date < now_local.date():
+        return int((24 * 60) / interval_minutes)
+    if report_date > now_local.date():
+        return 0
+    minutes = now_local.hour * 60 + now_local.minute
+    return (minutes // interval_minutes) + 1
+
+
+def _stale_minutes(latest_timestamp: str | None, now_local: datetime) -> int | None:
+    if not latest_timestamp:
+        return None
+    try:
+        latest = datetime.fromisoformat(latest_timestamp)
+    except ValueError:
+        return None
+    if latest.tzinfo is None:
+        latest = latest.replace(tzinfo=now_local.tzinfo)
+    delta = now_local - latest.astimezone(now_local.tzinfo)
+    return max(0, int(delta.total_seconds() // 60))
+
+
+def _floor_timestamp_text(value: Any, interval_minutes: int) -> str | None:
+    if not value:
+        return None
+    try:
+        timestamp = datetime.fromisoformat(str(value))
+    except ValueError:
+        return None
+    if interval_minutes <= 0:
+        floored = timestamp.replace(second=0, microsecond=0)
+    else:
+        total_minutes = timestamp.hour * 60 + timestamp.minute
+        floored_minutes = (total_minutes // interval_minutes) * interval_minutes
+        floored = timestamp.replace(
+            hour=floored_minutes // 60,
+            minute=floored_minutes % 60,
+            second=0,
+            microsecond=0,
+        )
+    return floored.isoformat()
+
+
 def _latest_slot(
     measurements: list[dict[str, Any]],
     latest_run: dict[str, Any] | None,
@@ -383,6 +470,22 @@ def _usage_class(value: float | None) -> str:
     if value >= 80:
         return "warn"
     return "ok"
+
+
+def _stale_class(stale_minutes: int | None, interval_minutes: int) -> str:
+    if stale_minutes is None:
+        return "bad"
+    if stale_minutes > interval_minutes * 2:
+        return "bad"
+    if stale_minutes > interval_minutes:
+        return "warn"
+    return "ok"
+
+
+def _age_label(stale_minutes: int | None) -> str:
+    if stale_minutes is None:
+        return "brak"
+    return f"{stale_minutes} min"
 
 
 def _percent(value: int | float | None, total: int | float | None) -> float:

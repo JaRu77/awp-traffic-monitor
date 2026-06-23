@@ -44,6 +44,9 @@ function Show-Status {
     Write-Host ("Requesty dzis:        {0} / {1}" -f $status.request_total, $status.request_limit_reference)
     Write-Host ("Punkty:               {0}" -f $status.points)
     Write-Host ("Bledy dzis:           {0}" -f $status.errors_today)
+    Write-Host ("Sloty dzis:           {0} / {1}" -f $status.completed_slots_today, $status.expected_slots_so_far)
+    Write-Host ("Braki slotow:         {0}" -f $status.missing_slots_so_far)
+    Write-Host ("Wiek danych:          {0} min" -f $status.stale_minutes)
     Write-Host ("Slot pomiaru:         {0}" -f (Short-Time $slot))
     Write-Host ("Pobrano faktycznie:   {0}" -f (Short-Time $status.latest_measurement))
     Wait-Key

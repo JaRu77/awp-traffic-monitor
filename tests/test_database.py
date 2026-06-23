@@ -3,6 +3,7 @@ from awp_traffic.database import (
     get_daily_request_total,
     get_fetch_runs_for_date,
     get_latest_fetch_run,
+    get_measurement_point_ids_for_slot,
     get_measurements_for_date,
     insert_measurement,
     update_fetch_run,
@@ -89,3 +90,4 @@ def test_measurement_slot_fields_are_persisted(tmp_path):
     assert len(rows) == 1
     assert rows[0]["measurement_slot_local"] == "2026-06-22T12:00:00+02:00"
     assert rows[0]["timestamp_local"] == "2026-06-22T12:08:00+02:00"
+    assert get_measurement_point_ids_for_slot(db_path, "2026-06-22T12:00:00+02:00") == {"p1"}

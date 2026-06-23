@@ -103,7 +103,6 @@ def init_db(db_path: str | Path) -> None:
                 ON measurements(timestamp_local);
             CREATE INDEX IF NOT EXISTS idx_measurements_point_date
                 ON measurements(point_id, timestamp_local);
-
             CREATE TABLE IF NOT EXISTS fetch_runs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 started_at_utc TEXT NOT NULL,
@@ -135,6 +134,13 @@ def init_db(db_path: str | Path) -> None:
         _ensure_column(connection, "measurements", "measurement_slot_local", "TEXT")
         _ensure_column(connection, "fetch_runs", "scheduled_slot_utc", "TEXT")
         _ensure_column(connection, "fetch_runs", "scheduled_slot_local", "TEXT")
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_measurements_slot_point
+                ON measurements(measurement_slot_local, point_id)
+                WHERE measurement_slot_local IS NOT NULL
+            """
+        )
 
 
 def upsert_points(db_path: str | Path, points: Iterable[dict[str, Any]]) -> None:
@@ -311,6 +317,22 @@ def get_measurement_count_for_date(db_path: str | Path, date_iso: str) -> int:
             (date_iso,),
         ).fetchone()[0]
     return int(value or 0)
+
+
+def get_measurement_point_ids_for_slot(db_path: str | Path, slot_local: str) -> set[str]:
+    """Return point ids already stored for a planned measurement slot."""
+
+    init_db(db_path)
+    with connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT point_id
+            FROM measurements
+            WHERE measurement_slot_local = ?
+            """,
+            (slot_local,),
+        ).fetchall()
+    return {str(row["point_id"]) for row in rows}
 
 
 def get_points(db_path: str | Path) -> list[dict[str, Any]]:
