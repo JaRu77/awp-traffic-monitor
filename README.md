@@ -106,6 +106,26 @@ Po kazdym cyklu workflow generuje statyczny pulpit `reports/dashboard/index.html
 
 Lokalny podglad pulpitu w przegladarce:
 
+Najwygodniejsza lokalna appka kontrolna:
+
+```text
+control_panel.cmd
+```
+
+Otwiera panel pod adresem:
+
+```text
+http://127.0.0.1:8010/
+```
+
+W panelu mozna odswiezyc dane z GitHuba, otworzyc pulpit HTML, mape punktow, status JSON, raporty i GitHub Actions. Odswiezenie z GitHuba nie zuzywa limitu TomTom API.
+
+Wersja konsolowa w PowerShellu:
+
+```text
+traffic_console.cmd
+```
+
 Najprosciej uruchom plik:
 
 ```text
