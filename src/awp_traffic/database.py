@@ -11,6 +11,8 @@ from typing import Any, Iterable
 MEASUREMENT_FIELDS = [
     "timestamp_utc",
     "timestamp_local",
+    "measurement_slot_utc",
+    "measurement_slot_local",
     "point_id",
     "point_name",
     "direction",
@@ -31,6 +33,8 @@ MEASUREMENT_FIELDS = [
 FETCH_RUN_FIELDS = [
     "started_at_utc",
     "started_at_local",
+    "scheduled_slot_utc",
+    "scheduled_slot_local",
     "finished_at_utc",
     "finished_at_local",
     "status",
@@ -75,6 +79,8 @@ def init_db(db_path: str | Path) -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp_utc TEXT NOT NULL,
                 timestamp_local TEXT NOT NULL,
+                measurement_slot_utc TEXT,
+                measurement_slot_local TEXT,
                 point_id TEXT NOT NULL,
                 point_name TEXT,
                 direction TEXT,
@@ -102,6 +108,8 @@ def init_db(db_path: str | Path) -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 started_at_utc TEXT NOT NULL,
                 started_at_local TEXT NOT NULL,
+                scheduled_slot_utc TEXT,
+                scheduled_slot_local TEXT,
                 finished_at_utc TEXT,
                 finished_at_local TEXT,
                 status TEXT NOT NULL,
@@ -123,6 +131,10 @@ def init_db(db_path: str | Path) -> None:
                 ON fetch_runs(status);
             """
         )
+        _ensure_column(connection, "measurements", "measurement_slot_utc", "TEXT")
+        _ensure_column(connection, "measurements", "measurement_slot_local", "TEXT")
+        _ensure_column(connection, "fetch_runs", "scheduled_slot_utc", "TEXT")
+        _ensure_column(connection, "fetch_runs", "scheduled_slot_local", "TEXT")
 
 
 def upsert_points(db_path: str | Path, points: Iterable[dict[str, Any]]) -> None:
@@ -334,3 +346,17 @@ def _row_to_dict(row: sqlite3.Row) -> dict[str, Any]:
         if key in result:
             result[key] = bool(result[key])
     return result
+
+
+def _ensure_column(
+    connection: sqlite3.Connection,
+    table_name: str,
+    column_name: str,
+    column_type: str,
+) -> None:
+    columns = {
+        row["name"]
+        for row in connection.execute(f"PRAGMA table_info({table_name})").fetchall()
+    }
+    if column_name not in columns:
+        connection.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}")

@@ -42,8 +42,10 @@ def generate_daily_report(
         return markdown_path, html_path
 
     frame = pd.DataFrame(measurements)
+    time_column = _analysis_time_column(frame)
     frame["timestamp_local_dt"] = pd.to_datetime(frame["timestamp_local"], errors="coerce")
-    frame["hour"] = frame["timestamp_local_dt"].dt.floor("h")
+    frame["analysis_time_dt"] = pd.to_datetime(frame[time_column], errors="coerce")
+    frame["hour"] = frame["analysis_time_dt"].dt.floor("h")
 
     for column in [
         "current_speed",
@@ -83,6 +85,15 @@ def generate_daily_report(
 
 
 def _create_hourly_figures(frame: pd.DataFrame, date_iso: str, figures_dir: Path) -> dict[str, Path]:
+    import os
+
+    cache_dir = figures_dir / ".matplotlib-cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("MPLCONFIGDIR", str(cache_dir))
+
+    import matplotlib
+
+    matplotlib.use("Agg", force=True)
     import matplotlib.pyplot as plt
 
     figure_paths: dict[str, Path] = {}
@@ -237,6 +248,7 @@ def _build_markdown_report(
         "",
         f"Liczba pomiarow: {len(frame)}",
         f"Liczba punktow pomiarowych: {frame['point_id'].nunique()}",
+        f"Liczba cykli pomiarowych: {frame['analysis_time_dt'].dropna().nunique()}",
         f"Srednia predkosc biezaca: {_format_number(frame['current_speed'].mean())} km/h",
         f"Sredni indeks plynnosci ruchu: {_format_number(frame['congestion_index'].mean())}",
         f"Sredni wskaznik opoznienia: {_format_number(frame['delay_ratio'].mean())}",
@@ -252,7 +264,7 @@ def _build_markdown_report(
             [
                 "### Najgorsza godzina",
                 "",
-                f"- Godzina: {worst_hour['hour'].strftime('%Y-%m-%d %H:%M')}",
+                f"- Godzina slotu pomiarowego: {worst_hour['hour'].strftime('%Y-%m-%d %H:%M')}",
                 f"- Sredni indeks plynnosci: {_format_number(worst_hour['congestion_index_mean'])}",
                 f"- Sredni wskaznik opoznienia: {_format_number(worst_hour['delay_ratio_mean'])}",
                 f"- Srednia predkosc: {_format_number(worst_hour['current_speed_mean'])} km/h",
@@ -317,6 +329,15 @@ def _empty_report(date_iso: str, settings: dict[str, Any]) -> str:
             "",
         ]
     )
+
+
+def _analysis_time_column(frame: pd.DataFrame) -> str:
+    if (
+        "measurement_slot_local" in frame.columns
+        and frame["measurement_slot_local"].notna().any()
+    ):
+        return "measurement_slot_local"
+    return "timestamp_local"
 
 
 def _dataframe_to_markdown(frame: pd.DataFrame) -> str:

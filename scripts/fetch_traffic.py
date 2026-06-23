@@ -46,6 +46,7 @@ def main() -> int:
     monitoring_settings = settings.get("monitoring", {})
     tomtom_settings = settings.get("tomtom", {})
     timezone_name = project_settings.get("timezone", "Europe/Warsaw")
+    interval_minutes = int(project_settings.get("measurement_interval_minutes", 15))
     local_zone = ZoneInfo(timezone_name)
     db_path = PROJECT_ROOT / (args.database or settings.get("database", {}).get("path", "data/awp_traffic.sqlite"))
     raw_dir = PROJECT_ROOT / args.raw_dir
@@ -56,6 +57,8 @@ def main() -> int:
     daily_request_soft_limit = int(daily_request_soft_limit) if daily_request_soft_limit is not None else None
     started_utc = datetime.now(timezone.utc)
     started_local = started_utc.astimezone(local_zone)
+    scheduled_slot_utc = _floor_to_interval(started_utc, interval_minutes)
+    scheduled_slot_local = scheduled_slot_utc.astimezone(local_zone)
     local_date = started_local.date().isoformat()
     daily_requests_before = get_daily_request_total(db_path, local_date)
     should_log_run = not args.dry_run or args.log_dry_run
@@ -67,6 +70,8 @@ def main() -> int:
             {
                 "started_at_utc": started_utc.isoformat(),
                 "started_at_local": started_local.isoformat(),
+                "scheduled_slot_utc": scheduled_slot_utc.isoformat(),
+                "scheduled_slot_local": scheduled_slot_local.isoformat(),
                 "finished_at_utc": None,
                 "finished_at_local": None,
                 "status": "started",
@@ -139,6 +144,8 @@ def main() -> int:
             if timestamp_utc.tzinfo is None:
                 timestamp_utc = timestamp_utc.replace(tzinfo=timezone.utc)
             measurement["timestamp_local"] = timestamp_utc.astimezone(local_zone).isoformat()
+            measurement["measurement_slot_utc"] = scheduled_slot_utc.isoformat()
+            measurement["measurement_slot_local"] = scheduled_slot_local.isoformat()
 
             metrics = calculate_metrics(
                 measurement["current_speed"],
@@ -222,6 +229,21 @@ def _finish_run(
             "failures": failures,
             "message": message,
         },
+    )
+
+
+def _floor_to_interval(value: datetime, interval_minutes: int) -> datetime:
+    """Return the planned measurement slot for a delayed scheduled run."""
+
+    if interval_minutes <= 0:
+        return value.replace(second=0, microsecond=0)
+    total_minutes = value.hour * 60 + value.minute
+    floored_minutes = (total_minutes // interval_minutes) * interval_minutes
+    return value.replace(
+        hour=floored_minutes // 60,
+        minute=floored_minutes % 60,
+        second=0,
+        microsecond=0,
     )
 
 

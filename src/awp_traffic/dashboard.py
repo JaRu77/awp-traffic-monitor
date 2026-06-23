@@ -40,6 +40,7 @@ def generate_dashboard(
     expected_daily_requests = len(points) * expected_runs
     latest_measurements = _latest_measurements_by_point(measurements)
     latest_timestamp = _latest_timestamp(measurements)
+    latest_slot = _latest_slot(measurements, latest_run)
     errors_today = sum(int(run.get("failures") or 0) for run in fetch_runs)
     successful_requests_today = sum(int(run.get("successes") or 0) for run in fetch_runs)
     worst_point = _worst_latest_point(latest_measurements)
@@ -58,6 +59,7 @@ def generate_dashboard(
         "successful_requests_today": successful_requests_today,
         "errors_today": errors_today,
         "latest_measurement": latest_timestamp,
+        "latest_scheduled_slot": latest_slot,
         "latest_run_status": latest_run.get("status") if latest_run else None,
         "worst_point": worst_point,
     }
@@ -79,6 +81,7 @@ def generate_dashboard(
         successful_requests_today=successful_requests_today,
         errors_today=errors_today,
         latest_timestamp=latest_timestamp,
+        latest_slot=latest_slot,
         worst_point=worst_point,
     )
 
@@ -107,6 +110,7 @@ def _build_html(
     successful_requests_today: int,
     errors_today: int,
     latest_timestamp: str | None,
+    latest_slot: str | None,
     worst_point: dict[str, Any] | None,
 ) -> str:
     monitoring_settings = settings.get("monitoring", {})
@@ -126,7 +130,8 @@ def _build_html(
         _card("Limit miekki", soft_limit_label, _usage_class(soft_pct)),
         _card("Punkty", str(len(points)), "ok"),
         _card("Bledy dzis", str(errors_today), "ok" if errors_today == 0 else "warn"),
-        _card("Ostatni pomiar", _short_datetime(latest_timestamp), "ok" if latest_timestamp else "warn"),
+        _card("Slot pomiaru", _short_datetime(latest_slot), "ok" if latest_slot else "warn"),
+        _card("Pobrano faktycznie", _short_datetime(latest_timestamp), "ok" if latest_timestamp else "warn"),
         _card("Plan dzienny", str(expected_daily_requests), _usage_class(_percent(expected_daily_requests, request_limit_reference))),
     ]
 
@@ -190,7 +195,7 @@ def _build_html(
 <body>
   <header>
     <h1>{escape(title)}</h1>
-    <div class="muted">Data lokalna: {escape(date_iso)} · wygenerowano: {escape(generated_at)} · auto-odswiezanie: {refresh_seconds}s</div>
+    <div class="muted">Data lokalna: {escape(date_iso)} &middot; wygenerowano: {escape(generated_at)} &middot; auto-odswiezanie: {refresh_seconds}s</div>
   </header>
   <main>
     <div class="grid">
@@ -269,6 +274,7 @@ def _latest_table(points: list[dict[str, Any]], latest_measurements: list[dict[s
                 f"<td>{_fmt(row.get('delay_ratio'))}</td>"
                 f"<td>{_fmt(row.get('confidence'))}</td>"
                 f"<td>{escape(interpretation)}</td>"
+                f"<td>{escape(_short_datetime(row.get('measurement_slot_local') or row.get('timestamp_local')))}</td>"
                 f"<td>{escape(_short_datetime(row.get('timestamp_local')))}</td>"
                 "</tr>"
             )
@@ -278,14 +284,14 @@ def _latest_table(points: list[dict[str, Any]], latest_measurements: list[dict[s
                 f"<td>{escape(str(point.get('corridor_order', '')))}</td>"
                 f"<td>{escape(str(point.get('name', '')))}</td>"
                 f"<td>{escape(str(point.get('direction', '')))}</td>"
-                '<td colspan="7" class="muted">Brak pomiaru dzisiaj</td>'
+                '<td colspan="8" class="muted">Brak pomiaru dzisiaj</td>'
                 "</tr>"
             )
 
     return (
         "<table><thead><tr>"
         "<th>#</th><th>Punkt</th><th>Kierunek</th><th>V teraz</th><th>V swob.</th>"
-        "<th>Indeks</th><th>Opozn.</th><th>Conf.</th><th>Interpretacja</th><th>Czas</th>"
+        "<th>Indeks</th><th>Opozn.</th><th>Conf.</th><th>Interpretacja</th><th>Slot</th><th>Pobrano</th>"
         "</tr></thead><tbody>"
         + "".join(rows)
         + "</tbody></table>"
@@ -300,6 +306,7 @@ def _runs_table(fetch_runs: list[dict[str, Any]]) -> str:
     for run in fetch_runs[:16]:
         rows.append(
             "<tr>"
+            f"<td>{escape(_short_datetime(run.get('scheduled_slot_local')))}</td>"
             f"<td>{escape(_short_datetime(run.get('started_at_local')))}</td>"
             f"<td>{escape(str(run.get('status', '')))}</td>"
             f"<td>{escape(str(run.get('requests_attempted', 0)))}</td>"
@@ -310,7 +317,7 @@ def _runs_table(fetch_runs: list[dict[str, Any]]) -> str:
         )
     return (
         "<table><thead><tr>"
-        "<th>Start</th><th>Status</th><th>Requesty</th><th>Sukcesy</th><th>Bledy</th><th>Komunikat</th>"
+        "<th>Slot planowany</th><th>Start faktyczny</th><th>Status</th><th>Requesty</th><th>Sukcesy</th><th>Bledy</th><th>Komunikat</th>"
         "</tr></thead><tbody>"
         + "".join(rows)
         + "</tbody></table>"
@@ -321,8 +328,9 @@ def _latest_measurements_by_point(measurements: list[dict[str, Any]]) -> list[di
     latest: dict[str, dict[str, Any]] = {}
     for row in measurements:
         point_id = row.get("point_id")
-        current_ts = str(row.get("timestamp_local") or "")
-        previous_ts = str(latest.get(point_id, {}).get("timestamp_local") or "")
+        current_ts = str(row.get("measurement_slot_local") or row.get("timestamp_local") or "")
+        previous = latest.get(point_id, {})
+        previous_ts = str(previous.get("measurement_slot_local") or previous.get("timestamp_local") or "")
         if point_id and current_ts >= previous_ts:
             latest[point_id] = row
     return list(latest.values())
@@ -331,6 +339,22 @@ def _latest_measurements_by_point(measurements: list[dict[str, Any]]) -> list[di
 def _latest_timestamp(measurements: list[dict[str, Any]]) -> str | None:
     timestamps = [str(row.get("timestamp_local")) for row in measurements if row.get("timestamp_local")]
     return max(timestamps) if timestamps else None
+
+
+def _latest_slot(
+    measurements: list[dict[str, Any]],
+    latest_run: dict[str, Any] | None,
+) -> str | None:
+    slots = [
+        str(row.get("measurement_slot_local"))
+        for row in measurements
+        if row.get("measurement_slot_local")
+    ]
+    if slots:
+        return max(slots)
+    if latest_run and latest_run.get("scheduled_slot_local"):
+        return str(latest_run["scheduled_slot_local"])
+    return _latest_timestamp(measurements)
 
 
 def _worst_latest_point(latest_measurements: list[dict[str, Any]]) -> dict[str, Any] | None:

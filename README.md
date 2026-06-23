@@ -8,6 +8,8 @@ Projekt nie korzysta ze scrapingu Google Maps, automatycznych zrzutow ekranu Goo
 
 Projekt monitoruje wybrane punkty pomiarowe na al. Wojska Polskiego w Szczecinie. Dla kazdego punktu pobiera biezaca predkosc, predkosc swobodna, biezacy czas przejazdu, swobodny czas przejazdu, wiarygodnosc danych i informacje o zamknieciu drogi. Na tej podstawie oblicza wskazniki opoznienia i przeciazenia ruchu.
 
+Projekt odpytuje tylko wybrane punkty z `config/points.yaml`. Nie pobiera wszystkich drog w Szczecinie, nie pobiera kafelkow, nie odpytuje incydentow i nie korzysta z Google Maps. Z odpowiedzi TomTom do kolumn analitycznych trafia wybrany zestaw pol potrzebnych do badania, ale pelna odpowiedz API jest zachowana w `raw_json` oraz w plikach `data/raw/`.
+
 ## Klucz TomTom API
 
 1. Zaloz konto w portalu TomTom Developer: <https://developer.tomtom.com/>.
@@ -93,9 +95,18 @@ python -m pytest
 
 Workflow `hourly.yml` uruchamia `scripts/fetch_traffic.py` co 15 minut, czyli wedlug harmonogramu `0,15,30,45 * * * *`, i moze byc uruchomiony recznie przez `workflow_dispatch`. Przy 24 punktach pomiarowych oznacza to okolo 2304 zapytan dziennie, czyli ponizej limitu referencyjnego 2500 zapytan dziennie.
 
+GitHub Actions moze uruchomic zaplanowany cykl z opoznieniem kilku minut. Dlatego baza zapisuje dwa rodzaje czasu:
+
+- `measurement_slot_local` / `scheduled_slot_local` - planowany slot badawczy, np. `06:30`;
+- `timestamp_local` / `started_at_local` - faktyczny czas pobrania, np. `06:38`.
+
+Do analiz godzinowych i raportow uzywany jest slot badawczy. Faktyczny czas zostaje w bazie jako informacja kontrolna.
+
 Po kazdym cyklu workflow generuje statyczny pulpit `reports/dashboard/index.html` oraz plik maszynowy `reports/dashboard/status.json`. Pulpit pokazuje liczbe requestow dzisiaj, zapas limitu, status ostatniego cyklu, ostatnie pomiary dla punktow i ostatnie uruchomienia skryptu.
 
-Lokalny podglad pulpitu w przegladarce dziala dopiero po uruchomieniu lokalnego serwera. Najprosciej uruchom plik:
+Lokalny podglad pulpitu w przegladarce:
+
+Najprosciej uruchom plik:
 
 ```text
 start_dashboard.cmd
@@ -119,7 +130,7 @@ Mapa punktow bedzie wtedy dostepna pod:
 http://127.0.0.1:8000/maps/awp_points.html
 ```
 
-Zostaw okno serwera otwarte. Zamkniecie okna zatrzymuje lokalny panel. Panel online z adresem WWW wymaga GitHub Pages albo innego hostingu statycznego.
+Ten lokalny panel korzysta z danych, ktore sa aktualnie pobrane do folderu `reports`. Panel online z adresem WWW wymaga GitHub Pages albo innego hostingu statycznego.
 
 Workflow `daily_report.yml` generuje raport dobowy raz dziennie i rowniez obsluguje `workflow_dispatch`. Dla uruchomienia recznego mozna podac date raportu w formacie `YYYY-MM-DD`; puste pole oznacza poprzedni dzien wzgledem strefy Europe/Warsaw.
 
@@ -183,6 +194,8 @@ Glowna tabela `measurements` w SQLite zawiera:
 - `id`
 - `timestamp_utc`
 - `timestamp_local`
+- `measurement_slot_utc`
+- `measurement_slot_local`
 - `point_id`
 - `point_name`
 - `direction`
@@ -200,6 +213,8 @@ Glowna tabela `measurements` w SQLite zawiera:
 - `raw_json`
 
 Tabela `points` przechowuje konfiguracje punktow pomiarowych.
+
+Tabela `fetch_runs` przechowuje log cykli pobierania, w tym planowany slot (`scheduled_slot_local`), faktyczny start (`started_at_local`), liczbe requestow, liczbe sukcesow i bledow.
 
 ## Wskazniki
 
