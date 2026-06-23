@@ -18,7 +18,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Utworz bezpieczna kopie bazy SQLite.")
     parser.add_argument("--settings", default="config/settings.yaml", help="Sciezka do settings.yaml.")
     parser.add_argument("--output-dir", default="backups", help="Katalog kopii.")
-    parser.add_argument("--keep", type=int, default=14, help="Ile najnowszych kopii zostawic.")
+    parser.add_argument("--keep", type=int, default=7, help="Ile najnowszych kopii zostawic.")
     args = parser.parse_args()
 
     settings = _load_yaml(PROJECT_ROOT / args.settings)

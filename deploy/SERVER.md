@@ -114,7 +114,7 @@ docker compose down
 Jednorazowy backup bazy:
 
 ```bash
-docker compose run --rm scheduler python scripts/backup_sqlite.py --keep 30
+docker compose run --rm scheduler python scripts/backup_sqlite.py --keep 7
 ```
 
 ## Wariant B: systemd bez Dockera
