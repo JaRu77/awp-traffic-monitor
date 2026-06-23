@@ -112,10 +112,20 @@ Najprosciej uruchom plik:
 start_dashboard.cmd
 ```
 
+Ten plik najpierw pobiera najnowszy stan dashboardu i bazy z GitHuba, a potem uruchamia lokalny panel.
+
+Jesli panel juz dziala i chcesz tylko odswiezyc stan badania na zadanie, uruchom:
+
+```text
+refresh_dashboard.cmd
+```
+
+Po odswiezeniu danych przeladuj karte z pulpitem w przegladarce.
+
 Albo z PowerShella:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\serve_dashboard.py
+.\.venv\Scripts\python.exe scripts\serve_dashboard.py --sync
 ```
 
 Adres domyslny:

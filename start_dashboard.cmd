@@ -11,19 +11,6 @@ if not exist ".venv\Scripts\python.exe" (
   exit /b 1
 )
 
-echo Odswiezam pulpit z lokalnej bazy...
-".venv\Scripts\python.exe" scripts\make_dashboard.py
-if errorlevel 1 (
-  echo.
-  echo Nie udalo sie wygenerowac pulpitu.
-  pause
-  exit /b 1
-)
-
+echo Uruchamiam pulpit i pobieram najnowszy stan z GitHuba...
 echo.
-echo Pulpit monitoringu:
-echo http://127.0.0.1:8000/dashboard/
-echo.
-echo Zostaw to okno otwarte. Zamkniecie okna zatrzyma panel.
-start "" "http://127.0.0.1:8000/dashboard/"
-".venv\Scripts\python.exe" -m http.server 8000 --bind 127.0.0.1 --directory reports
+".venv\Scripts\python.exe" scripts\serve_dashboard.py --sync

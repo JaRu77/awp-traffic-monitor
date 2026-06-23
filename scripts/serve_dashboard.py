@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Serve the static dashboard and report files in a local browser."""
+"""Serve the static dashboard in a local browser."""
 
 from __future__ import annotations
 
@@ -21,9 +21,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Uruchom lokalny podglad pulpitu HTML.")
     parser.add_argument("--host", default="127.0.0.1", help="Adres nasluchiwania.")
     parser.add_argument("--port", type=int, default=8000, help="Port HTTP.")
+    parser.add_argument("--sync", action="store_true", help="Pobierz najnowszy dashboard z GitHuba przed startem.")
     parser.add_argument("--no-generate", action="store_true", help="Nie generuj panelu przed startem.")
     parser.add_argument("--no-open", action="store_true", help="Nie otwieraj przegladarki automatycznie.")
     args = parser.parse_args()
+
+    if args.sync:
+        result = subprocess.run([sys.executable, str(PROJECT_ROOT / "scripts" / "sync_from_github.py")])
+        if result.returncode != 0:
+            print("Nie udalo sie zsynchronizowac z GitHubem. Uzywam lokalnych plikow.")
 
     if not args.no_generate:
         subprocess.run([sys.executable, str(PROJECT_ROOT / "scripts" / "make_dashboard.py")], check=True)
