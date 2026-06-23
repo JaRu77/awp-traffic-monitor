@@ -272,6 +272,80 @@ Logi wysylki:
 journalctl -u awp-traffic-email.service --no-pager -n 80
 ```
 
+## Backup zdalny do Google Drive
+
+Najprostszy wariant zdalnej kopii to `rclone`. Serwer robi zwykly lokalny backup SQLite, a potem wysyla pliki `awp_traffic_*.sqlite` do katalogu na Google Drive.
+
+Instalacja rclone na VPS:
+
+```bash
+sudo apt update
+sudo apt install -y rclone
+```
+
+Konfiguracja Google Drive:
+
+```bash
+rclone config
+```
+
+W kreatorze wybierz:
+
+```text
+n
+name> gdrive
+Storage> drive
+client_id> [Enter]
+client_secret> [Enter]
+scope> drive.file
+service_account_file> [Enter]
+Edit advanced config? n
+Use auto config? n
+```
+
+Rclone pokaze dlugi link. Skopiuj go do przegladarki na swoim komputerze, zaloguj sie do Google, zatwierdz dostep i wklej kod albo token z powrotem do terminala VPS. Przy pytaniu o shared drive zwykle wybierz `n`, a na koncu `y`, zeby zapisac konfiguracje.
+
+Test polaczenia:
+
+```bash
+rclone lsd gdrive:
+rclone mkdir gdrive:AWP-Traffic-Backups/backups
+```
+
+Do pliku `/opt/awp-traffic-monitor/.env` dopisz:
+
+```text
+REMOTE_BACKUP_ENABLED=true
+RCLONE_REMOTE_PATH=gdrive:AWP-Traffic-Backups/backups
+REMOTE_BACKUP_KEEP_DAYS=120
+```
+
+Test reczny:
+
+```bash
+cd /opt/awp-traffic-monitor
+.venv/bin/python scripts/remote_backup.py --force
+```
+
+Instalacja automatycznego backupu zdalnego:
+
+```bash
+sudo cp /opt/awp-traffic-monitor/deploy/systemd/awp-traffic-remote-backup.service /etc/systemd/system/
+sudo cp /opt/awp-traffic-monitor/deploy/systemd/awp-traffic-remote-backup.timer /etc/systemd/system/
+sudo sed -i 's/User=awp/User=ubuntu/g; s/Group=awp/Group=ubuntu/g' /etc/systemd/system/awp-traffic-remote-backup.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now awp-traffic-remote-backup.timer
+systemctl list-timers --no-pager | grep awp
+```
+
+Logi backupu zdalnego:
+
+```bash
+journalctl -u awp-traffic-remote-backup.service --no-pager -n 80
+```
+
+Uwaga: zdalny backup nie zastepuje lokalnego backupu. To druga kopia poza VPS, przydatna na wypadek awarii dysku, usuniecia serwera albo pomylki administracyjnej.
+
 ## Bezpieczenstwo
 
 Na start najprosciej otworzyc port 8000 tylko dla swojego IP albo przez zapore serwera. Publiczny pulpit bez hasla nie powinien wisiec stale w internecie.

@@ -1,0 +1,13 @@
+[Unit]
+Description=AWP traffic monitor remote backup
+After=network-online.target awp-traffic-backup.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=awp
+Group=awp
+WorkingDirectory=/opt/awp-traffic-monitor
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/opt/awp-traffic-monitor/.env
+ExecStart=/opt/awp-traffic-monitor/.venv/bin/python scripts/remote_backup.py

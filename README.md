@@ -211,6 +211,8 @@ Docelowy tryb badawczy dla pracy 24/7 to jednak serwer VPS, bo GitHub Actions ni
 
 Serwer VPS moze takze wysylac raz dziennie raport email z zalacznikami Markdown, HTML i CSV. Funkcja jest opcjonalna, wymaga danych SMTP w pliku `.env` na serwerze i jest opisana w `deploy/SERVER.md`.
 
+Serwer moze dodatkowo wysylac lokalne kopie bazy SQLite na Google Drive przez `rclone`. To opcjonalny backup poza VPS, opisany w `deploy/SERVER.md`.
+
 Najwazniejsze ustawienia sa w `config/settings.yaml`:
 
 ```yaml
