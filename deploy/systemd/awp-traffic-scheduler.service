@@ -1,0 +1,19 @@
+[Unit]
+Description=AWP traffic monitor scheduler
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=awp
+Group=awp
+WorkingDirectory=/opt/awp-traffic-monitor
+EnvironmentFile=/opt/awp-traffic-monitor/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=MPLCONFIGDIR=/tmp/awp-matplotlib
+ExecStart=/opt/awp-traffic-monitor/.venv/bin/python scripts/server_scheduler.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

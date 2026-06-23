@@ -22,11 +22,15 @@ def generate_dashboard(
     latest_run: dict[str, Any] | None,
     request_total: int,
     output_dir: str | Path,
+    routes: list[dict[str, Any]] | None = None,
+    route_measurements: list[dict[str, Any]] | None = None,
 ) -> tuple[Path, Path]:
     """Generate dashboard HTML and a compact JSON status file."""
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    routes = routes or []
+    route_measurements = route_measurements or []
 
     dashboard_settings = settings.get("dashboard", {})
     monitoring_settings = settings.get("monitoring", {})
@@ -46,7 +50,9 @@ def generate_dashboard(
     expected_slots_so_far = _expected_slots_so_far(date_iso, now_local, interval_minutes)
     missing_slots_so_far = max(0, expected_slots_so_far - slot_count)
     latest_measurements = _latest_measurements_by_point(measurements)
+    latest_route_measurements = _latest_measurements_by_route(route_measurements)
     latest_timestamp = _latest_timestamp(measurements)
+    latest_route_timestamp = _latest_route_timestamp(route_measurements)
     latest_slot = _latest_slot(measurements, latest_run)
     stale_minutes = _stale_minutes(latest_timestamp, now_local)
     errors_today = sum(int(run.get("failures") or 0) for run in fetch_runs)
@@ -59,6 +65,7 @@ def generate_dashboard(
         "generated_at": generated_at,
         "monitoring_enabled": bool(monitoring_settings.get("enabled", True)),
         "points": len(points),
+        "routes": len(routes),
         "interval_minutes": interval_minutes,
         "expected_daily_requests": expected_daily_requests,
         "request_total": request_total,
@@ -71,6 +78,7 @@ def generate_dashboard(
         "missing_slots_so_far": missing_slots_so_far,
         "stale_minutes": stale_minutes,
         "latest_measurement": latest_timestamp,
+        "latest_route_measurement": latest_route_timestamp,
         "latest_scheduled_slot": latest_slot,
         "latest_run_status": latest_run.get("status") if latest_run else None,
         "worst_point": worst_point,
@@ -81,9 +89,11 @@ def generate_dashboard(
         refresh_seconds=refresh_seconds,
         settings=settings,
         points=points,
+        routes=routes,
         date_iso=date_iso,
         generated_at=generated_at,
         latest_measurements=latest_measurements,
+        latest_route_measurements=latest_route_measurements,
         latest_run=latest_run,
         fetch_runs=fetch_runs,
         request_total=request_total,
@@ -115,9 +125,11 @@ def _build_html(
     refresh_seconds: int,
     settings: dict[str, Any],
     points: list[dict[str, Any]],
+    routes: list[dict[str, Any]],
     date_iso: str,
     generated_at: str,
     latest_measurements: list[dict[str, Any]],
+    latest_route_measurements: list[dict[str, Any]],
     latest_run: dict[str, Any] | None,
     fetch_runs: list[dict[str, Any]],
     request_total: int,
@@ -151,6 +163,7 @@ def _build_html(
         _card("Requesty dzis", f"{request_total} / {request_limit_reference}", _usage_class(reference_pct)),
         _card("Limit miekki", soft_limit_label, _usage_class(soft_pct)),
         _card("Punkty", str(len(points)), "ok"),
+        _card("Trasy", str(len(routes)), "ok" if routes else "warn"),
         _card("Bledy dzis", str(errors_today), "ok" if errors_today == 0 else "warn"),
         _card("Sloty dzis", f"{slot_count} / {expected_slots_so_far}", "ok" if missing_slots_so_far == 0 else "warn"),
         _card("Braki slotow", str(missing_slots_so_far), "ok" if missing_slots_so_far == 0 else "bad"),
@@ -245,6 +258,11 @@ def _build_html(
     </section>
 
     <section>
+      <h2>Czasy przejazdu tras</h2>
+      {_routes_table(routes, latest_route_measurements)}
+    </section>
+
+    <section>
       <h2>Ostatnie pomiary wg punktow</h2>
       {_latest_table(points, latest_measurements)}
     </section>
@@ -325,6 +343,54 @@ def _latest_table(points: list[dict[str, Any]], latest_measurements: list[dict[s
     )
 
 
+def _routes_table(routes: list[dict[str, Any]], latest_route_measurements: list[dict[str, Any]]) -> str:
+    if not routes:
+        return '<p class="muted">Brak skonfigurowanych tras odcinkowych.</p>'
+
+    by_route = {row.get("route_id"): row for row in latest_route_measurements}
+    rows = []
+    for route in sorted(routes, key=lambda item: item.get("corridor_order") or 0):
+        row = by_route.get(route.get("id"))
+        if row:
+            interpretation = interpret_conditions(
+                _to_float(row.get("congestion_index")),
+                _to_float(row.get("delay_ratio")),
+            )
+            rows.append(
+                "<tr>"
+                f"<td>{escape(str(route.get('corridor_order', '')))}</td>"
+                f"<td>{escape(str(route.get('name', '')))}</td>"
+                f"<td>{escape(str(route.get('direction', '')))}</td>"
+                f"<td>{_fmt(row.get('travel_time_seconds'))}</td>"
+                f"<td>{_fmt(row.get('no_traffic_travel_time_seconds'))}</td>"
+                f"<td>{_fmt(row.get('delay_seconds'))}</td>"
+                f"<td>{_fmt(row.get('delay_ratio'))}</td>"
+                f"<td>{_fmt(row.get('average_speed_kmh'))}</td>"
+                f"<td>{escape(interpretation)}</td>"
+                f"<td>{escape(_short_datetime(row.get('measurement_slot_local') or row.get('timestamp_local')))}</td>"
+                f"<td>{escape(_short_datetime(row.get('timestamp_local')))}</td>"
+                "</tr>"
+            )
+        else:
+            rows.append(
+                "<tr>"
+                f"<td>{escape(str(route.get('corridor_order', '')))}</td>"
+                f"<td>{escape(str(route.get('name', '')))}</td>"
+                f"<td>{escape(str(route.get('direction', '')))}</td>"
+                '<td colspan="8" class="muted">Brak pomiaru trasy dzisiaj</td>'
+                "</tr>"
+            )
+
+    return (
+        "<table><thead><tr>"
+        "<th>#</th><th>Trasa</th><th>Kierunek</th><th>Czas teraz s</th><th>Czas bez ruchu s</th>"
+        "<th>Opozn. s</th><th>Opozn. ratio</th><th>V srednia km/h</th><th>Interpretacja</th><th>Slot</th><th>Pobrano</th>"
+        "</tr></thead><tbody>"
+        + "".join(rows)
+        + "</tbody></table>"
+    )
+
+
 def _runs_table(fetch_runs: list[dict[str, Any]]) -> str:
     if not fetch_runs:
         return '<p class="muted">Brak zapisanych cykli pobierania dla tej daty.</p>'
@@ -363,8 +429,25 @@ def _latest_measurements_by_point(measurements: list[dict[str, Any]]) -> list[di
     return list(latest.values())
 
 
+def _latest_measurements_by_route(route_measurements: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    latest: dict[str, dict[str, Any]] = {}
+    for row in route_measurements:
+        route_id = row.get("route_id")
+        current_ts = str(row.get("measurement_slot_local") or row.get("timestamp_local") or "")
+        previous = latest.get(route_id, {})
+        previous_ts = str(previous.get("measurement_slot_local") or previous.get("timestamp_local") or "")
+        if route_id and current_ts >= previous_ts:
+            latest[route_id] = row
+    return list(latest.values())
+
+
 def _latest_timestamp(measurements: list[dict[str, Any]]) -> str | None:
     timestamps = [str(row.get("timestamp_local")) for row in measurements if row.get("timestamp_local")]
+    return max(timestamps) if timestamps else None
+
+
+def _latest_route_timestamp(route_measurements: list[dict[str, Any]]) -> str | None:
+    timestamps = [str(row.get("timestamp_local")) for row in route_measurements if row.get("timestamp_local")]
     return max(timestamps) if timestamps else None
 
 

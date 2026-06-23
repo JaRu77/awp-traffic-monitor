@@ -1,0 +1,28 @@
+routes:
+  - id: awp_route_zwyciestwa_to_szarych
+    name: "AWP: Plac Zwyciestwa -> Plac Szarych Szeregow"
+    direction: "Plac Zwyciestwa -> Plac Szarych Szeregow"
+    corridor_order: 1
+    coordinates:
+      - latitude: 53.4261406
+        longitude: 14.546218
+      - latitude: 53.4284542
+        longitude: 14.544053
+      - latitude: 53.4313293
+        longitude: 14.5416835
+      - latitude: 53.432813
+        longitude: 14.5405971
+
+  - id: awp_route_szarych_to_zwyciestwa
+    name: "AWP: Plac Szarych Szeregow -> Plac Zwyciestwa"
+    direction: "Plac Szarych Szeregow -> Plac Zwyciestwa"
+    corridor_order: 2
+    coordinates:
+      - latitude: 53.4326876
+        longitude: 14.5404576
+      - latitude: 53.4315929
+        longitude: 14.54132
+      - latitude: 53.4284112
+        longitude: 14.5439274
+      - latitude: 53.4261875
+        longitude: 14.545826

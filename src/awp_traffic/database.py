@@ -50,6 +50,36 @@ FETCH_RUN_FIELDS = [
     "message",
 ]
 
+ROUTE_MEASUREMENT_FIELDS = [
+    "timestamp_utc",
+    "timestamp_local",
+    "measurement_slot_utc",
+    "measurement_slot_local",
+    "route_id",
+    "route_name",
+    "direction",
+    "origin_latitude",
+    "origin_longitude",
+    "destination_latitude",
+    "destination_longitude",
+    "waypoint_count",
+    "length_meters",
+    "travel_time_seconds",
+    "no_traffic_travel_time_seconds",
+    "historic_traffic_travel_time_seconds",
+    "live_traffic_travel_time_seconds",
+    "traffic_delay_seconds",
+    "traffic_length_meters",
+    "average_speed_kmh",
+    "free_flow_average_speed_kmh",
+    "congestion_index",
+    "delay_ratio",
+    "delay_seconds",
+    "departure_time",
+    "arrival_time",
+    "raw_json",
+]
+
 
 def connect(db_path: str | Path) -> sqlite3.Connection:
     path = Path(db_path)
@@ -128,6 +158,73 @@ def init_db(db_path: str | Path) -> None:
                 ON fetch_runs(started_at_local);
             CREATE INDEX IF NOT EXISTS idx_fetch_runs_status
                 ON fetch_runs(status);
+
+            CREATE TABLE IF NOT EXISTS routes (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                direction TEXT,
+                origin_latitude REAL NOT NULL,
+                origin_longitude REAL NOT NULL,
+                destination_latitude REAL NOT NULL,
+                destination_longitude REAL NOT NULL,
+                waypoint_count INTEGER NOT NULL DEFAULT 0,
+                corridor_order INTEGER
+            );
+
+            CREATE TABLE IF NOT EXISTS route_measurements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp_utc TEXT NOT NULL,
+                timestamp_local TEXT NOT NULL,
+                measurement_slot_utc TEXT,
+                measurement_slot_local TEXT,
+                route_id TEXT NOT NULL,
+                route_name TEXT,
+                direction TEXT,
+                origin_latitude REAL,
+                origin_longitude REAL,
+                destination_latitude REAL,
+                destination_longitude REAL,
+                waypoint_count INTEGER,
+                length_meters REAL,
+                travel_time_seconds REAL,
+                no_traffic_travel_time_seconds REAL,
+                historic_traffic_travel_time_seconds REAL,
+                live_traffic_travel_time_seconds REAL,
+                traffic_delay_seconds REAL,
+                traffic_length_meters REAL,
+                average_speed_kmh REAL,
+                free_flow_average_speed_kmh REAL,
+                congestion_index REAL,
+                delay_ratio REAL,
+                delay_seconds REAL,
+                departure_time TEXT,
+                arrival_time TEXT,
+                raw_json TEXT,
+                FOREIGN KEY(route_id) REFERENCES routes(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_route_measurements_local_date
+                ON route_measurements(timestamp_local);
+            CREATE INDEX IF NOT EXISTS idx_route_measurements_route_date
+                ON route_measurements(route_id, timestamp_local);
+            """
+        )
+        _ensure_column(connection, "measurements", "measurement_slot_utc", "TEXT")
+        _ensure_column(connection, "measurements", "measurement_slot_local", "TEXT")
+        _ensure_column(connection, "fetch_runs", "scheduled_slot_utc", "TEXT")
+        _ensure_column(connection, "fetch_runs", "scheduled_slot_local", "TEXT")
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_measurements_slot_point
+                ON measurements(measurement_slot_local, point_id)
+                WHERE measurement_slot_local IS NOT NULL
+            """
+        )
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_route_measurements_slot_route
+                ON route_measurements(measurement_slot_local, route_id)
+                WHERE measurement_slot_local IS NOT NULL
             """
         )
         _ensure_column(connection, "measurements", "measurement_slot_utc", "TEXT")
@@ -170,6 +267,37 @@ def upsert_points(db_path: str | Path, points: Iterable[dict[str, Any]]) -> None
         )
 
 
+def upsert_routes(db_path: str | Path, routes: Iterable[dict[str, Any]]) -> None:
+    """Insert or update route metadata."""
+
+    init_db(db_path)
+    with connect(db_path) as connection:
+        connection.executemany(
+            """
+            INSERT INTO routes (
+                id, name, direction, origin_latitude, origin_longitude,
+                destination_latitude, destination_longitude, waypoint_count,
+                corridor_order
+            )
+            VALUES (
+                :id, :name, :direction, :origin_latitude, :origin_longitude,
+                :destination_latitude, :destination_longitude, :waypoint_count,
+                :corridor_order
+            )
+            ON CONFLICT(id) DO UPDATE SET
+                name = excluded.name,
+                direction = excluded.direction,
+                origin_latitude = excluded.origin_latitude,
+                origin_longitude = excluded.origin_longitude,
+                destination_latitude = excluded.destination_latitude,
+                destination_longitude = excluded.destination_longitude,
+                waypoint_count = excluded.waypoint_count,
+                corridor_order = excluded.corridor_order;
+            """,
+            [_normalize_route(route) for route in routes],
+        )
+
+
 def insert_measurement(db_path: str | Path, measurement: dict[str, Any]) -> int:
     """Persist one normalized measurement and return its database id."""
 
@@ -186,6 +314,24 @@ def insert_measurement(db_path: str | Path, measurement: dict[str, Any]) -> int:
 
     with connect(db_path) as connection:
         cursor = connection.execute(sql, {field: record.get(field) for field in MEASUREMENT_FIELDS})
+        return int(cursor.lastrowid)
+
+
+def insert_route_measurement(db_path: str | Path, measurement: dict[str, Any]) -> int:
+    """Persist one normalized route measurement and return its database id."""
+
+    init_db(db_path)
+    record = dict(measurement)
+    raw_json = record.get("raw_json")
+    if raw_json is not None and not isinstance(raw_json, str):
+        record["raw_json"] = json.dumps(raw_json, ensure_ascii=False)
+
+    placeholders = ", ".join(f":{field}" for field in ROUTE_MEASUREMENT_FIELDS)
+    columns = ", ".join(ROUTE_MEASUREMENT_FIELDS)
+    sql = f"INSERT INTO route_measurements ({columns}) VALUES ({placeholders})"
+
+    with connect(db_path) as connection:
+        cursor = connection.execute(sql, {field: record.get(field) for field in ROUTE_MEASUREMENT_FIELDS})
         return int(cursor.lastrowid)
 
 
@@ -244,6 +390,26 @@ def get_measurements_for_date(
             FROM measurements
             WHERE substr(timestamp_local, 1, 10) = ?
             ORDER BY timestamp_local, point_id
+            """,
+            (date_iso,),
+        ).fetchall()
+    return [_row_to_dict(row) for row in rows]
+
+
+def get_route_measurements_for_date(
+    db_path: str | Path,
+    date_iso: str,
+) -> list[dict[str, Any]]:
+    """Return all route measurements whose local timestamp starts with YYYY-MM-DD."""
+
+    init_db(db_path)
+    with connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT *
+            FROM route_measurements
+            WHERE substr(timestamp_local, 1, 10) = ?
+            ORDER BY timestamp_local, route_id
             """,
             (date_iso,),
         ).fetchall()
@@ -335,6 +501,22 @@ def get_measurement_point_ids_for_slot(db_path: str | Path, slot_local: str) -> 
     return {str(row["point_id"]) for row in rows}
 
 
+def get_route_ids_for_slot(db_path: str | Path, slot_local: str) -> set[str]:
+    """Return route ids already stored for a planned measurement slot."""
+
+    init_db(db_path)
+    with connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT route_id
+            FROM route_measurements
+            WHERE measurement_slot_local = ?
+            """,
+            (slot_local,),
+        ).fetchall()
+    return {str(row["route_id"]) for row in rows}
+
+
 def get_points(db_path: str | Path) -> list[dict[str, Any]]:
     init_db(db_path)
     with connect(db_path) as connection:
@@ -342,6 +524,19 @@ def get_points(db_path: str | Path) -> list[dict[str, Any]]:
             """
             SELECT *
             FROM points
+            ORDER BY corridor_order, id
+            """
+        ).fetchall()
+    return [_row_to_dict(row) for row in rows]
+
+
+def get_routes(db_path: str | Path) -> list[dict[str, Any]]:
+    init_db(db_path)
+    with connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT *
+            FROM routes
             ORDER BY corridor_order, id
             """
         ).fetchall()
@@ -357,6 +552,25 @@ def _normalize_point(point: dict[str, Any]) -> dict[str, Any]:
         "direction": point.get("direction"),
         "location_description": point.get("location_description"),
         "corridor_order": point.get("corridor_order"),
+    }
+
+
+def _normalize_route(route: dict[str, Any]) -> dict[str, Any]:
+    coordinates = route.get("coordinates") or []
+    if len(coordinates) < 2:
+        raise ValueError(f"Trasa {route.get('id')} musi miec co najmniej dwie wspolrzedne.")
+    origin = coordinates[0]
+    destination = coordinates[-1]
+    return {
+        "id": route["id"],
+        "name": route["name"],
+        "direction": route.get("direction"),
+        "origin_latitude": origin["latitude"],
+        "origin_longitude": origin["longitude"],
+        "destination_latitude": destination["latitude"],
+        "destination_longitude": destination["longitude"],
+        "waypoint_count": max(0, len(coordinates) - 2),
+        "corridor_order": route.get("corridor_order"),
     }
 
 

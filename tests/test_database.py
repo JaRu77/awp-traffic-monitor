@@ -5,7 +5,10 @@ from awp_traffic.database import (
     get_latest_fetch_run,
     get_measurement_point_ids_for_slot,
     get_measurements_for_date,
+    get_route_ids_for_slot,
+    get_route_measurements_for_date,
     insert_measurement,
+    insert_route_measurement,
     update_fetch_run,
 )
 
@@ -91,3 +94,45 @@ def test_measurement_slot_fields_are_persisted(tmp_path):
     assert rows[0]["measurement_slot_local"] == "2026-06-22T12:00:00+02:00"
     assert rows[0]["timestamp_local"] == "2026-06-22T12:08:00+02:00"
     assert get_measurement_point_ids_for_slot(db_path, "2026-06-22T12:00:00+02:00") == {"p1"}
+
+
+def test_route_measurement_slot_fields_are_persisted(tmp_path):
+    db_path = tmp_path / "traffic.sqlite"
+    insert_route_measurement(
+        db_path,
+        {
+            "timestamp_utc": "2026-06-22T10:08:00+00:00",
+            "timestamp_local": "2026-06-22T12:08:00+02:00",
+            "measurement_slot_utc": "2026-06-22T10:00:00+00:00",
+            "measurement_slot_local": "2026-06-22T12:00:00+02:00",
+            "route_id": "r1",
+            "route_name": "Trasa testowa",
+            "direction": "A -> B",
+            "origin_latitude": 53.4,
+            "origin_longitude": 14.5,
+            "destination_latitude": 53.5,
+            "destination_longitude": 14.6,
+            "waypoint_count": 1,
+            "length_meters": 3000,
+            "travel_time_seconds": 300,
+            "no_traffic_travel_time_seconds": 200,
+            "historic_traffic_travel_time_seconds": 220,
+            "live_traffic_travel_time_seconds": 300,
+            "traffic_delay_seconds": 100,
+            "traffic_length_meters": 900,
+            "average_speed_kmh": 36,
+            "free_flow_average_speed_kmh": 54,
+            "congestion_index": 0.666,
+            "delay_ratio": 1.5,
+            "delay_seconds": 100,
+            "departure_time": "2026-06-22T12:08:00+02:00",
+            "arrival_time": "2026-06-22T12:13:00+02:00",
+            "raw_json": {"ok": True},
+        },
+    )
+
+    rows = get_route_measurements_for_date(db_path, "2026-06-22")
+    assert len(rows) == 1
+    assert rows[0]["measurement_slot_local"] == "2026-06-22T12:00:00+02:00"
+    assert rows[0]["route_id"] == "r1"
+    assert get_route_ids_for_slot(db_path, "2026-06-22T12:00:00+02:00") == {"r1"}

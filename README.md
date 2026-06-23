@@ -2,20 +2,21 @@
 
 Male repozytorium badawcze w Pythonie do cyklicznego pobierania danych o warunkach ruchu z TomTom Traffic API, zapisywania pomiarow w SQLite i generowania raportow dobowych w Markdown oraz HTML.
 
-Projekt nie korzysta ze scrapingu Google Maps, automatycznych zrzutow ekranu Google Maps ani zapisywania kafelkow mapowych. Dane pomiarowe pochodza z endpointu TomTom Traffic API Flow Segment Data.
+Projekt nie korzysta ze scrapingu Google Maps, automatycznych zrzutow ekranu Google Maps ani zapisywania kafelkow mapowych. Dane pomiarowe pochodza z endpointu TomTom Traffic API Flow Segment Data. Repo zawiera tez opcjonalny tor badawczy oparty o TomTom Routing API, ktory mierzy czas przejazdu zdefiniowanych odcinkow.
 
 ## Cel projektu
 
 Projekt monitoruje wybrane punkty pomiarowe na al. Wojska Polskiego w Szczecinie. Dla kazdego punktu pobiera biezaca predkosc, predkosc swobodna, biezacy czas przejazdu, swobodny czas przejazdu, wiarygodnosc danych i informacje o zamknieciu drogi. Na tej podstawie oblicza wskazniki opoznienia i przeciazenia ruchu.
 
-Projekt odpytuje tylko wybrane punkty z `config/points.yaml`. Nie pobiera wszystkich drog w Szczecinie, nie pobiera kafelkow, nie odpytuje incydentow i nie korzysta z Google Maps. Z odpowiedzi TomTom do kolumn analitycznych trafia wybrany zestaw pol potrzebnych do badania, ale pelna odpowiedz API jest zachowana w `raw_json` oraz w plikach `data/raw/`.
+Projekt odpytuje tylko wybrane punkty z `config/points.yaml` oraz, opcjonalnie, trasy z `config/routes.yaml`. Nie pobiera wszystkich drog w Szczecinie, nie pobiera kafelkow, nie odpytuje incydentow i nie korzysta z Google Maps. Z odpowiedzi TomTom do kolumn analitycznych trafia wybrany zestaw pol potrzebnych do badania, ale pelna odpowiedz API jest zachowana w `raw_json` oraz w plikach `data/raw/` albo `data/raw_routes/`.
 
 ## Klucz TomTom API
 
 1. Zaloz konto w portalu TomTom Developer: <https://developer.tomtom.com/>.
 2. Utworz aplikacje i wlacz dostep do Traffic API.
-3. Skopiuj klucz API.
-4. Ustaw zmienna srodowiskowa:
+3. Jesli chcesz testowac czasy przejazdu tras, wlacz dla tego samego klucza takze Routing API.
+4. Skopiuj klucz API.
+5. Ustaw zmienna srodowiskowa:
 
 ```bash
 export TOMTOM_API_KEY="twoj_klucz"
@@ -42,6 +43,34 @@ Punkty sa zdefiniowane w `config/points.yaml`. Kazdy punkt zawiera:
 - `corridor_order`
 
 Wspolrzedne nalezy traktowac jako punkty orientacyjne dla endpointu Flow Segment Data. Przed dluzszym monitoringiem warto zweryfikowac, czy TomTom przypisuje je do oczekiwanych segmentow ulicznych.
+
+## Konfiguracja tras odcinkowych
+
+Trasy sa zdefiniowane w `config/routes.yaml`. Ten plik sluzy do pomiaru czasu przejazdu calym odcinkiem, np. `Plac Zwyciestwa -> Plac Szarych Szeregow`, zamiast oceny pojedynczego punktu.
+
+Kazda trasa zawiera:
+
+- `id`
+- `name`
+- `direction`
+- `corridor_order`
+- `coordinates` - punkt startowy, opcjonalne punkty posrednie i punkt koncowy
+
+Ten tryb uzywa TomTom Routing API. Jest domyslnie wylaczony w `config/settings.yaml`, bo kazda trasa to dodatkowy request. Przy 24 punktach Flow co 15 minut dzienny plan to 2304 requesty. Dodanie dwoch tras w kazdym slocie daje kolejne 192 requesty dziennie, czyli lacznie okolo 2496 requestow. To miesci sie blisko referencyjnego limitu 2500, ale prawie nie zostawia marginesu na reczne testy, opoznienia i ponowienia. Przy obecnym limicie miekkim projektu `daily_request_soft_limit: 2400` pelnodobowy tryb Flow + 2 trasy bedzie celowo blokowany pod koniec dnia; trzeba wtedy zmniejszyc liczbe punktow Flow, rzadziej mierzyc trasy albo swiadomie podniesc limit miekki.
+
+Jednorazowy test tras:
+
+```bash
+python scripts/fetch_routes.py --force
+```
+
+Windows:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\fetch_routes.py --force
+```
+
+Jesli TomTom zwroci blad autoryzacji, sprawdz w MyTomTom, czy klucz ma wlaczony produkt Routing API.
 
 ## Uruchomienie lokalne
 
@@ -97,7 +126,7 @@ Workflow `hourly.yml` dziala jako watchdog co 5 minut wedlug harmonogramu `*/5 *
 
 Przy 24 punktach pomiarowych i kompletnych slotach co 15 minut plan wynosi okolo 2304 zapytan dziennie, czyli ponizej limitu referencyjnego 2500 zapytan dziennie.
 
-GitHub Actions moze uruchomic zaplanowany cykl z opoznieniem kilku minut. Dlatego baza zapisuje dwa rodzaje czasu:
+GitHub Actions moze uruchomic zaplanowany cykl z opoznieniem kilku minut, a sporadycznie moze pominac zaplanowany cykl. To jest wystarczajace do prototypu i obserwacji trendow, ale nie jest zegarem laboratoryjnym. Dlatego baza zapisuje dwa rodzaje czasu:
 
 - `measurement_slot_local` / `scheduled_slot_local` - planowany slot badawczy, np. `06:30`;
 - `timestamp_local` / `started_at_local` - faktyczny czas pobrania, np. `06:38`.
@@ -172,11 +201,13 @@ W repozytorium GitHub dodaj sekret:
 TOMTOM_API_KEY
 ```
 
-Oba workflow maja uprawnienie `contents: write`, aby commitowac zebrane dane i wygenerowane raporty do repozytorium. Dla wiekszego projektu badawczego lepszym miejscem na dane moze byc zewnetrzny storage albo baza poza repozytorium.
+Oba workflow maja uprawnienie `contents: write`, aby commitowac zebrane dane i wygenerowane raporty do repozytorium. Dla wiekszego projektu badawczego lepszym miejscem na dane moze byc zewnetrzny storage albo baza poza repozytorium. Pushowanie pliku SQLite i wielu JSON-ow do Gita co 15 minut jest rozwiazaniem prototypowym, podatnym na konflikty i rozrost historii repozytorium.
 
 ## Kontrola pracy 24/7
 
 Monitoring jest zaprojektowany tak, aby dzialal przez GitHub Actions nawet wtedy, gdy komputer lokalny jest wylaczony.
+
+Docelowy tryb badawczy dla pracy 24/7 to jednak serwer VPS, bo GitHub Actions nie jest precyzyjnym zegarem pomiarowym. Gotowa instrukcja wdrozenia serwerowego jest w `deploy/SERVER.md`. GitHub moze wtedy zostac miejscem na kod, a serwer przejmuje pobieranie danych, baze SQLite, dashboard i backupy.
 
 Najwazniejsze ustawienia sa w `config/settings.yaml`:
 
@@ -246,6 +277,30 @@ Glowna tabela `measurements` w SQLite zawiera:
 
 Tabela `points` przechowuje konfiguracje punktow pomiarowych.
 
+Tabela `routes` przechowuje konfiguracje tras odcinkowych.
+
+Tabela `route_measurements` przechowuje pomiary z TomTom Routing API:
+
+- `timestamp_utc`
+- `timestamp_local`
+- `measurement_slot_utc`
+- `measurement_slot_local`
+- `route_id`
+- `route_name`
+- `direction`
+- `length_meters`
+- `travel_time_seconds`
+- `no_traffic_travel_time_seconds`
+- `historic_traffic_travel_time_seconds`
+- `live_traffic_travel_time_seconds`
+- `traffic_delay_seconds`
+- `average_speed_kmh`
+- `free_flow_average_speed_kmh`
+- `congestion_index`
+- `delay_ratio`
+- `delay_seconds`
+- `raw_json`
+
 Tabela `fetch_runs` przechowuje log cykli pobierania, w tym planowany slot (`scheduled_slot_local`), faktyczny start (`started_at_local`), liczbe requestow, liczbe sukcesow i bledow.
 
 ## Wskazniki
@@ -268,8 +323,20 @@ Interpretacja obejmuje kategorie:
 
 Progi interpretacyjne sa w `config/settings.yaml`.
 
+Dla tras odcinkowych znaczenie jest analogiczne, ale liczone na czasie przejazdu calej trasy:
+
+```text
+delay_ratio = travel_time_seconds / no_traffic_travel_time_seconds
+delay_seconds = traffic_delay_seconds
+congestion_index = no_traffic_travel_time_seconds / travel_time_seconds
+```
+
+W praktyce trasy odcinkowe sa lepszym wskaznikiem uzytkowego opoznienia niz pojedyncze punkty Flow, bo pokazuja, ile trwa przejazd przez caly badany fragment ulicy.
+
 ## Ograniczenia metodologiczne
 
 Projekt nie mierzy bezposrednio natezenia ruchu w pojazdach na godzine. Projekt mierzy warunki ruchu, predkosc biezaca, predkosc swobodna, czas przejazdu, opoznienie oraz wskazniki przeciazenia. Sa to wskazniki zastepcze, ktore moga byc uzyte do analizy zmiennosci warunkow ruchu na odcinku ulicznym.
 
 Dane z Flow Segment Data sa zalezne od dostepnosci i wiarygodnosci danych TomTom dla danego miejsca i momentu. Punkt pomiarowy jest przekazywany jako wspolrzedna, a API zwraca dane dla dopasowanego segmentu drogowego. Z tego powodu interpretacja wynikow powinna uwzgledniac mozliwe przesuniecie segmentu, zmiany organizacji ruchu, remonty, zdarzenia incydentalne oraz rozna jakosc danych w poszczegolnych porach dnia.
+
+Jesli w godzinach szczytu punkty Flow nadal pokazuja stale `congestion_index = 1.0` i `delay_ratio = 1.0`, nie nalezy tego automatycznie traktowac jako dowodu braku korkow. Moze to oznaczac, ze Flow Segment Data ma za mala czulosc dla tych krotkich odcinkow. W takim przypadku bardziej wiarygodna dla badania bedzie analiza czasow przejazdu tras z Routing API albo uzupelnienie zrodla danych.

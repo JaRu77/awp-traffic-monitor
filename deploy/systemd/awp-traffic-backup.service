@@ -1,0 +1,10 @@
+[Unit]
+Description=AWP traffic monitor SQLite backup
+
+[Service]
+Type=oneshot
+User=awp
+Group=awp
+WorkingDirectory=/opt/awp-traffic-monitor
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/awp-traffic-monitor/.venv/bin/python scripts/backup_sqlite.py --keep 30

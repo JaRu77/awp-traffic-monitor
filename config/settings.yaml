@@ -10,11 +10,19 @@ monitoring:
 
 tomtom:
   endpoint_base: "https://api.tomtom.com/traffic/services/4/flowSegmentData"
+  routing_endpoint_base: "https://api.tomtom.com/routing/1/calculateRoute"
   style: "absolute"
   zoom: 10
   unit: "KMPH"
   timeout_seconds: 20
   request_delay_seconds: 0.3
+
+routing:
+  enabled: false
+  travel_mode: "car"
+  route_type: "fastest"
+  traffic: true
+  raw_dir: "data/raw_routes"
 
 database:
   path: "data/awp_traffic.sqlite"
@@ -32,6 +40,11 @@ dashboard:
   output_dir: "reports/dashboard"
   refresh_seconds: 300
   request_limit_reference: 2500
+
+server:
+  generate_dashboard_after_cycle: true
+  generate_daily_report: true
+  daily_report_time: "00:20"
 
 thresholds:
   low_confidence_below: 0.5

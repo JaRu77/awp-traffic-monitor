@@ -1,0 +1,17 @@
+[Unit]
+Description=AWP traffic monitor dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=awp
+Group=awp
+WorkingDirectory=/opt/awp-traffic-monitor
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/awp-traffic-monitor/.venv/bin/python scripts/serve_dashboard.py --host 0.0.0.0 --port 8000 --no-open
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
