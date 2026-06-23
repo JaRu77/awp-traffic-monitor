@@ -224,6 +224,54 @@ routing:
 
 Przy 24 punktach Flow i 2 trasach co 15 minut plan dzienny to okolo 2496 requestow. To jest bardzo blisko 2500, a przy limicie miekkim `2400` system bedzie blokowal koncowke dnia. Lepsza konfiguracja badawcza to np. mniej punktow Flow plus trasy odcinkowe.
 
+## Raport email raz dziennie
+
+Serwer moze wysylac dobowy raport mailem. Funkcja jest opcjonalna i domyslnie wylaczona.
+
+Do pliku `/opt/awp-traffic-monitor/.env` dopisz dane SMTP:
+
+```text
+EMAIL_ENABLED=true
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USERNAME=login_smtp
+SMTP_PASSWORD=haslo_smtp_lub_haslo_aplikacji
+SMTP_USE_TLS=true
+SMTP_USE_SSL=false
+EMAIL_FROM=awp-monitor@example.com
+EMAIL_TO=adres_docelowy@example.com
+```
+
+Uwagi:
+
+- Gmail zwykle wymaga hasla aplikacji, a nie zwyklego hasla do konta.
+- `EMAIL_TO` moze zawierac kilka adresow oddzielonych przecinkami.
+- Sekrety SMTP trzymamy tylko w `.env` na serwerze, nigdy w repozytorium.
+
+Test reczny:
+
+```bash
+cd /opt/awp-traffic-monitor
+.venv/bin/python scripts/send_daily_email.py --date YYYY-MM-DD --force
+```
+
+Instalacja uslugi email przez systemd:
+
+```bash
+sudo cp /opt/awp-traffic-monitor/deploy/systemd/awp-traffic-email.service /etc/systemd/system/
+sudo cp /opt/awp-traffic-monitor/deploy/systemd/awp-traffic-email.timer /etc/systemd/system/
+sudo sed -i 's/User=awp/User=ubuntu/g; s/Group=awp/Group=ubuntu/g' /etc/systemd/system/awp-traffic-email.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now awp-traffic-email.timer
+systemctl list-timers --no-pager | grep awp
+```
+
+Logi wysylki:
+
+```bash
+journalctl -u awp-traffic-email.service --no-pager -n 80
+```
+
 ## Bezpieczenstwo
 
 Na start najprosciej otworzyc port 8000 tylko dla swojego IP albo przez zapore serwera. Publiczny pulpit bez hasla nie powinien wisiec stale w internecie.

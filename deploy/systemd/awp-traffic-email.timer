@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily AWP traffic monitor email report
+
+[Timer]
+OnCalendar=*-*-* 00:45:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -46,6 +46,14 @@ server:
   generate_daily_report: true
   daily_report_time: "00:20"
 
+email:
+  enabled: false
+  send_time: "00:45"
+  subject_prefix: "[AWP traffic]"
+  attach_markdown: true
+  attach_html: true
+  attach_csv: true
+
 thresholds:
   low_confidence_below: 0.5
   congestion_index:

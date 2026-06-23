@@ -1,0 +1,14 @@
+[Unit]
+Description=AWP traffic monitor daily email report
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=awp
+Group=awp
+WorkingDirectory=/opt/awp-traffic-monitor
+EnvironmentFile=/opt/awp-traffic-monitor/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=MPLCONFIGDIR=/tmp/awp-matplotlib
+ExecStart=/opt/awp-traffic-monitor/.venv/bin/python scripts/send_daily_email.py --days-back 1

@@ -209,6 +209,8 @@ Monitoring jest zaprojektowany tak, aby dzialal przez GitHub Actions nawet wtedy
 
 Docelowy tryb badawczy dla pracy 24/7 to jednak serwer VPS, bo GitHub Actions nie jest precyzyjnym zegarem pomiarowym. Gotowa instrukcja wdrozenia serwerowego jest w `deploy/SERVER.md`. GitHub moze wtedy zostac miejscem na kod, a serwer przejmuje pobieranie danych, baze SQLite, dashboard i backupy.
 
+Serwer VPS moze takze wysylac raz dziennie raport email z zalacznikami Markdown, HTML i CSV. Funkcja jest opcjonalna, wymaga danych SMTP w pliku `.env` na serwerze i jest opisana w `deploy/SERVER.md`.
+
 Najwazniejsze ustawienia sa w `config/settings.yaml`:
 
 ```yaml
