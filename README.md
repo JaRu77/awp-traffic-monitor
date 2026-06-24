@@ -48,9 +48,10 @@ Wspolrzedne nalezy traktowac jako punkty orientacyjne dla endpointu Flow Segment
 
 Trasy sa zdefiniowane w `config/routes.yaml`. Ten plik sluzy do pomiaru czasu przejazdu calym odcinkiem, np. `Plac Zwyciestwa -> Plac Szarych Szeregow`, zamiast oceny pojedynczego punktu.
 
-Na serwerze punkty sa domyslnie mierzone co 15 minut, a trasy raz na godzine,
-zgodnie z `routing.measurement_interval_minutes: 60` w `config/settings.yaml`.
-Przy 24 punktach i 2 trasach daje to 2352 zapytania na typowa dobe.
+Na serwerze punkty sa domyslnie mierzone co 15 minut. Trasy mozna wlaczyc
+ustawieniem `routing.enabled: true`; wtedy sa mierzone raz na godzine, zgodnie
+z `routing.measurement_interval_minutes: 60`. Przy 24 punktach i 2 trasach
+daje to 2352 zapytania na typowa dobe.
 
 Kazda trasa zawiera:
 

@@ -207,7 +207,8 @@ sudo systemctl restart awp-traffic-dashboard.service
 
 ## Routing API na serwerze
 
-Domyslnie `routing.enabled` jest `true`, ale trasy sa mierzone tylko raz na
+Domyslnie `routing.enabled` jest `false`, aby brak uprawnienia Routing API nie
+zaklocal podstawowych pomiarow. Po wlaczeniu trasy sa mierzone tylko raz na
 godzine (`routing.measurement_interval_minutes: 60`). Punkty pozostaja mierzone
 co 15 minut. Przy 24 punktach i 2 trasach plan wynosi 2352 zapytania na typowa
 dobe.
