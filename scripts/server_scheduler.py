@@ -36,16 +36,24 @@ def main() -> int:
     local_zone = ZoneInfo(timezone_name)
     interval_minutes = int(project_settings.get("measurement_interval_minutes", 15))
     routes_enabled = bool(routing_settings.get("enabled", False)) and not args.skip_routes
+    routes_interval_minutes = int(routing_settings.get("measurement_interval_minutes", 60))
     dashboard_enabled = bool(server_settings.get("generate_dashboard_after_cycle", True)) and not args.skip_dashboard
     daily_enabled = bool(server_settings.get("generate_daily_report", True)) and not args.skip_daily_report
     daily_report_time = str(server_settings.get("daily_report_time", "00:20"))
 
     _log("Start serwerowego schedulera AWP.")
-    _log(f"Strefa: {timezone_name}; interwal: {interval_minutes} min; trasy Routing API: {'tak' if routes_enabled else 'nie'}.")
+    routes_description = (
+        f"tak, co {routes_interval_minutes} min" if routes_enabled else "nie"
+    )
+    _log(
+        f"Strefa: {timezone_name}; punkty co {interval_minutes} min; "
+        f"trasy Routing API: {routes_description}."
+    )
 
     if args.once:
         return _run_cycle(
             routes_enabled=routes_enabled,
+            routes_interval_minutes=routes_interval_minutes,
             dashboard_enabled=dashboard_enabled,
             daily_enabled=daily_enabled,
             daily_report_time=daily_report_time,
@@ -63,6 +71,7 @@ def main() -> int:
 
         _, last_daily_report_date = _run_cycle(
             routes_enabled=routes_enabled,
+            routes_interval_minutes=routes_interval_minutes,
             dashboard_enabled=dashboard_enabled,
             daily_enabled=daily_enabled,
             daily_report_time=daily_report_time,
@@ -74,6 +83,7 @@ def main() -> int:
 def _run_cycle(
     *,
     routes_enabled: bool,
+    routes_interval_minutes: int,
     dashboard_enabled: bool,
     daily_enabled: bool,
     daily_report_time: str,
@@ -86,7 +96,7 @@ def _run_cycle(
     exit_codes = []
     exit_codes.append(_run_command([sys.executable, "scripts/fetch_traffic.py"]))
 
-    if routes_enabled:
+    if routes_enabled and _is_interval_due(started, routes_interval_minutes):
         exit_codes.append(_run_command([sys.executable, "scripts/fetch_routes.py"]))
 
     if dashboard_enabled:
@@ -133,6 +143,14 @@ def _next_slot(now_local: datetime, interval_minutes: int) -> datetime:
         2,
         tzinfo=now_local.tzinfo,
     )
+
+
+def _is_interval_due(now_local: datetime, interval_minutes: int) -> bool:
+    """Return true when the current local minute belongs to the route interval."""
+    if interval_minutes <= 0:
+        return False
+    minutes_since_midnight = now_local.hour * 60 + now_local.minute
+    return minutes_since_midnight % interval_minutes == 0
 
 
 def _should_make_daily_report(

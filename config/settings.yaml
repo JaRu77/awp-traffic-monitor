@@ -18,7 +18,8 @@ tomtom:
   request_delay_seconds: 0.3
 
 routing:
-  enabled: false
+  enabled: true
+  measurement_interval_minutes: 60
   travel_mode: "car"
   route_type: "fastest"
   traffic: true

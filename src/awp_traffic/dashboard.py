@@ -35,6 +35,7 @@ def generate_dashboard(
     dashboard_settings = settings.get("dashboard", {})
     monitoring_settings = settings.get("monitoring", {})
     project_settings = settings.get("project", {})
+    routing_settings = settings.get("routing", {})
     timezone_name = project_settings.get("timezone", "Europe/Warsaw")
     local_zone = ZoneInfo(timezone_name)
     title = dashboard_settings.get("title", "Pulpit monitoringu AWP")
@@ -43,8 +44,14 @@ def generate_dashboard(
     soft_limit = monitoring_settings.get("daily_request_soft_limit")
     soft_limit = int(soft_limit) if soft_limit is not None else None
     interval_minutes = int(project_settings.get("measurement_interval_minutes", 15))
-    expected_runs = int((24 * 60) / interval_minutes) if interval_minutes > 0 else 0
-    expected_daily_requests = len(points) * expected_runs
+    routes_interval_minutes = int(routing_settings.get("measurement_interval_minutes", 60))
+    expected_daily_requests = _expected_daily_requests(
+        points_count=len(points),
+        point_interval_minutes=interval_minutes,
+        routes_count=len(routes),
+        route_interval_minutes=routes_interval_minutes,
+        routes_enabled=bool(routing_settings.get("enabled", False)),
+    )
     now_local = datetime.now(local_zone)
     slot_count = _completed_slot_count(measurements, interval_minutes)
     expected_slots_so_far = _expected_slots_so_far(date_iso, now_local, interval_minutes)
@@ -67,6 +74,7 @@ def generate_dashboard(
         "points": len(points),
         "routes": len(routes),
         "interval_minutes": interval_minutes,
+        "route_interval_minutes": routes_interval_minutes,
         "expected_daily_requests": expected_daily_requests,
         "request_total": request_total,
         "request_limit_reference": request_limit_reference,
@@ -449,6 +457,27 @@ def _latest_timestamp(measurements: list[dict[str, Any]]) -> str | None:
 def _latest_route_timestamp(route_measurements: list[dict[str, Any]]) -> str | None:
     timestamps = [str(row.get("timestamp_local")) for row in route_measurements if row.get("timestamp_local")]
     return max(timestamps) if timestamps else None
+
+
+def _expected_daily_requests(
+    *,
+    points_count: int,
+    point_interval_minutes: int,
+    routes_count: int,
+    route_interval_minutes: int,
+    routes_enabled: bool,
+) -> int:
+    point_runs = (
+        (24 * 60) // point_interval_minutes
+        if point_interval_minutes > 0
+        else 0
+    )
+    route_runs = (
+        (24 * 60) // route_interval_minutes
+        if routes_enabled and route_interval_minutes > 0
+        else 0
+    )
+    return points_count * point_runs + routes_count * route_runs
 
 
 def _completed_slot_count(measurements: list[dict[str, Any]], interval_minutes: int) -> int:

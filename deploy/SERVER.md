@@ -207,7 +207,10 @@ sudo systemctl restart awp-traffic-dashboard.service
 
 ## Routing API na serwerze
 
-Domyslnie `routing.enabled` jest `false`, bo dodatkowe trasy moga wyczerpac limit TomTom.
+Domyslnie `routing.enabled` jest `true`, ale trasy sa mierzone tylko raz na
+godzine (`routing.measurement_interval_minutes: 60`). Punkty pozostaja mierzone
+co 15 minut. Przy 24 punktach i 2 trasach plan wynosi 2352 zapytania na typowa
+dobe.
 
 Jednorazowy test tras:
 
