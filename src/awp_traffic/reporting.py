@@ -22,6 +22,7 @@ def generate_daily_report(
     *,
     date_iso: str,
     measurements: list[dict[str, Any]],
+    route_measurements: list[dict[str, Any]] | None = None,
     settings: dict[str, Any],
     output_dir: str | Path,
     figures_dir: str | Path,
@@ -61,6 +62,7 @@ def generate_daily_report(
 
     figure_paths = _create_hourly_figures(frame, date_iso, figures_dir)
     point_summary = _point_summary(frame)
+    route_summary = _route_summary(route_measurements or [])
     worst_hour = _worst_hour(frame)
     worst_point = _worst_point(frame)
     comment = _automatic_comment(frame, worst_hour, worst_point, settings)
@@ -70,6 +72,7 @@ def generate_daily_report(
         settings=settings,
         frame=frame,
         point_summary=point_summary,
+        route_summary=route_summary,
         worst_hour=worst_hour,
         worst_point=worst_point,
         comment=comment,
@@ -97,8 +100,9 @@ def _create_hourly_figures(frame: pd.DataFrame, date_iso: str, figures_dir: Path
     import matplotlib.pyplot as plt
 
     figure_paths: dict[str, Path] = {}
+    chart_frame = frame[frame["hour"].notna()].copy()
     hourly = (
-        frame.groupby(["hour", "point_name"], dropna=False)[list(METRIC_LABELS)]
+        chart_frame.groupby(["hour", "point_name"], dropna=False)[list(METRIC_LABELS)]
         .mean(numeric_only=True)
         .reset_index()
         .sort_values("hour")
@@ -142,6 +146,47 @@ def _point_summary(frame: pd.DataFrame) -> pd.DataFrame:
         measurements=("id", "count"),
     ).reset_index()
     return summary.sort_values(["congestion_index_mean", "delay_ratio_mean"], ascending=[True, False])
+
+
+def _route_summary(route_measurements: list[dict[str, Any]]) -> pd.DataFrame:
+    columns = [
+        "route_name",
+        "direction",
+        "travel_time_mean",
+        "travel_time_min",
+        "travel_time_max",
+        "delay_seconds_mean",
+        "delay_ratio_mean",
+        "average_speed_mean",
+        "measurements",
+        "source",
+    ]
+    if not route_measurements:
+        return pd.DataFrame(columns=columns)
+
+    frame = pd.DataFrame(route_measurements)
+    for column in [
+        "travel_time_seconds",
+        "delay_seconds",
+        "delay_ratio",
+        "average_speed_kmh",
+    ]:
+        frame[column] = pd.to_numeric(frame[column], errors="coerce")
+    frame["source"] = frame.get("source_label", "Estymacja z Flow")
+    summary = (
+        frame.groupby(["route_id", "route_name", "direction", "source"], dropna=False)
+        .agg(
+            travel_time_mean=("travel_time_seconds", "mean"),
+            travel_time_min=("travel_time_seconds", "min"),
+            travel_time_max=("travel_time_seconds", "max"),
+            delay_seconds_mean=("delay_seconds", "mean"),
+            delay_ratio_mean=("delay_ratio", "mean"),
+            average_speed_mean=("average_speed_kmh", "mean"),
+            measurements=("route_id", "count"),
+        )
+        .reset_index()
+    )
+    return summary[columns]
 
 
 def _worst_hour(frame: pd.DataFrame) -> dict[str, Any] | None:
@@ -228,6 +273,7 @@ def _build_markdown_report(
     settings: dict[str, Any],
     frame: pd.DataFrame,
     point_summary: pd.DataFrame,
+    route_summary: pd.DataFrame,
     worst_hour: dict[str, Any] | None,
     worst_point: dict[str, Any] | None,
     comment: str,
@@ -287,6 +333,16 @@ def _build_markdown_report(
 
     lines.extend(
         [
+            "## Estymowane czasy przejazdu odcinkow",
+            "",
+            (
+                _route_summary_to_markdown(route_summary)
+                if not route_summary.empty
+                else "Brak kompletnego zestawu punktow do estymacji tras."
+            ),
+            "",
+            "Czasy odcinkowe sa estymowane z predkosci Flow Segment Data, wazonych dlugoscia fragmentow pomiedzy punktami. Nie sa bezposrednim wynikiem TomTom Routing API i moga nie obejmowac calego czasu oczekiwania na skrzyzowaniach.",
+            "",
             "## Tabela punktow pomiarowych",
             "",
             _dataframe_to_markdown(point_summary),
@@ -369,6 +425,34 @@ def _dataframe_to_markdown(frame: pd.DataFrame) -> str:
     table = [
         "| " + " | ".join(headers) + " |",
         "| " + " | ".join(separator) + " |",
+    ]
+    table.extend("| " + " | ".join(row) + " |" for row in rows)
+    return "\n".join(table)
+
+
+def _route_summary_to_markdown(frame: pd.DataFrame) -> str:
+    display = frame.rename(
+        columns={
+            "route_name": "Trasa",
+            "direction": "Kierunek",
+            "travel_time_mean": "Czas sr. [s]",
+            "travel_time_min": "Czas min [s]",
+            "travel_time_max": "Czas max [s]",
+            "delay_seconds_mean": "Opoznienie sr. [s]",
+            "delay_ratio_mean": "Wskaznik opoznienia sr.",
+            "average_speed_mean": "Predkosc sr. [km/h]",
+            "measurements": "Liczba estymacji",
+            "source": "Zrodlo",
+        }
+    )
+    for column in display.columns:
+        if display[column].dtype.kind in "fc":
+            display[column] = display[column].map(_format_number)
+    headers = list(display.columns)
+    rows = display.astype(str).values.tolist()
+    table = [
+        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join(["---"] * len(headers)) + " |",
     ]
     table.extend("| " + " | ".join(row) + " |" for row in rows)
     return "\n".join(table)

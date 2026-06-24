@@ -266,7 +266,8 @@ def _build_html(
     </section>
 
     <section>
-      <h2>Czasy przejazdu tras</h2>
+      <h2>Estymowane czasy przejazdu odcinkow</h2>
+      <p class="muted">Wyniki pochodne z predkosci Flow w punktach korytarzowych; bez dodatkowych zapytan do API.</p>
       {_routes_table(routes, latest_route_measurements)}
     </section>
 
@@ -363,6 +364,7 @@ def _routes_table(routes: list[dict[str, Any]], latest_route_measurements: list[
             interpretation = interpret_conditions(
                 _to_float(row.get("congestion_index")),
                 _to_float(row.get("delay_ratio")),
+                confidence=_to_float(row.get("confidence")),
             )
             rows.append(
                 "<tr>"
@@ -375,6 +377,7 @@ def _routes_table(routes: list[dict[str, Any]], latest_route_measurements: list[
                 f"<td>{_fmt(row.get('delay_ratio'))}</td>"
                 f"<td>{_fmt(row.get('average_speed_kmh'))}</td>"
                 f"<td>{escape(interpretation)}</td>"
+                f"<td>{escape(_route_source_label(row))}</td>"
                 f"<td>{escape(_short_datetime(row.get('measurement_slot_local') or row.get('timestamp_local')))}</td>"
                 f"<td>{escape(_short_datetime(row.get('timestamp_local')))}</td>"
                 "</tr>"
@@ -385,14 +388,15 @@ def _routes_table(routes: list[dict[str, Any]], latest_route_measurements: list[
                 f"<td>{escape(str(route.get('corridor_order', '')))}</td>"
                 f"<td>{escape(str(route.get('name', '')))}</td>"
                 f"<td>{escape(str(route.get('direction', '')))}</td>"
-                '<td colspan="8" class="muted">Brak pomiaru trasy dzisiaj</td>'
+                '<td colspan="9" class="muted">Brak estymacji trasy dzisiaj</td>'
                 "</tr>"
             )
 
     return (
         "<table><thead><tr>"
         "<th>#</th><th>Trasa</th><th>Kierunek</th><th>Czas teraz s</th><th>Czas bez ruchu s</th>"
-        "<th>Opozn. s</th><th>Opozn. ratio</th><th>V srednia km/h</th><th>Interpretacja</th><th>Slot</th><th>Pobrano</th>"
+        "<th>Opozn. s</th><th>Opozn. ratio</th><th>V srednia km/h</th><th>Interpretacja</th>"
+        "<th>Zrodlo</th><th>Slot</th><th>Pobrano</th>"
         "</tr></thead><tbody>"
         + "".join(rows)
         + "</tbody></table>"
@@ -457,6 +461,15 @@ def _latest_timestamp(measurements: list[dict[str, Any]]) -> str | None:
 def _latest_route_timestamp(route_measurements: list[dict[str, Any]]) -> str | None:
     timestamps = [str(row.get("timestamp_local")) for row in route_measurements if row.get("timestamp_local")]
     return max(timestamps) if timestamps else None
+
+
+def _route_source_label(row: dict[str, Any]) -> str:
+    label = str(row.get("source_label") or "TomTom Routing API")
+    used = row.get("points_used")
+    expected = row.get("points_expected")
+    if used is not None and expected is not None:
+        return f"{label} ({used}/{expected} pkt)"
+    return label
 
 
 def _expected_daily_requests(

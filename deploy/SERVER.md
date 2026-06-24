@@ -213,6 +213,18 @@ godzine (`routing.measurement_interval_minutes: 60`). Punkty pozostaja mierzone
 co 15 minut. Przy 24 punktach i 2 trasach plan wynosi 2352 zapytania na typowa
 dobe.
 
+Dashboard i raport dobowy domyslnie wyliczaja takze estymowane czasy przejazdu
+obu kierunkow z istniejacych pomiarow Flow. Steruje tym:
+
+```yaml
+route_estimation:
+  enabled: true
+  require_all_points: true
+```
+
+Estymacja nie wykonuje dodatkowych requestow. Uzywa punktow `point_ids`
+zdefiniowanych dla kazdej trasy w `config/routes.yaml`.
+
 Jednorazowy test tras:
 
 ```bash
@@ -226,7 +238,9 @@ routing:
   enabled: true
 ```
 
-Przy 24 punktach Flow i 2 trasach co 15 minut plan dzienny to okolo 2496 requestow. To jest bardzo blisko 2500, a przy limicie miekkim `2400` system bedzie blokowal koncowke dnia. Lepsza konfiguracja badawcza to np. mniej punktow Flow plus trasy odcinkowe.
+Przy 24 punktach Flow i 2 trasach Routing API raz na godzine plan dzienny
+wynosi 2352 requesty. Sama estymacja z punktow pozostawia plan na poziomie
+2304 requestow.
 
 ## Raport email raz dziennie
 

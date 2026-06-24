@@ -53,15 +53,27 @@ ustawieniem `routing.enabled: true`; wtedy sa mierzone raz na godzine, zgodnie
 z `routing.measurement_interval_minutes: 60`. Przy 24 punktach i 2 trasach
 daje to 2352 zapytania na typowa dobe.
 
+Niezaleznie od Routing API projekt domyslnie estymuje czasy obu kierunkow AWP
+z juz pobranych predkosci Flow (`route_estimation.enabled: true`). Punkty
+korytarzowe sa wskazane przez `point_ids` w `config/routes.yaml`. Dlugosc
+reprezentowana przez punkt wynika z polow odleglosci do punktow sasiednich,
+a czas odcinka jest suma `dlugosc / predkosc`. Ta metoda nie zuzywa dodatkowych
+requestow API.
+
 Kazda trasa zawiera:
 
 - `id`
 - `name`
 - `direction`
 - `corridor_order`
+- `point_ids` - uporzadkowane punkty Flow uzywane do estymacji
 - `coordinates` - punkt startowy, opcjonalne punkty posrednie i punkt koncowy
 
-Ten tryb uzywa TomTom Routing API. Jest domyslnie wylaczony w `config/settings.yaml`, bo kazda trasa to dodatkowy request. Przy 24 punktach Flow co 15 minut dzienny plan to 2304 requesty. Dodanie dwoch tras w kazdym slocie daje kolejne 192 requesty dziennie, czyli lacznie okolo 2496 requestow. To miesci sie blisko referencyjnego limitu 2500, ale prawie nie zostawia marginesu na reczne testy, opoznienia i ponowienia. Przy obecnym limicie miekkim projektu `daily_request_soft_limit: 2400` pelnodobowy tryb Flow + 2 trasy bedzie celowo blokowany pod koniec dnia; trzeba wtedy zmniejszyc liczbe punktow Flow, rzadziej mierzyc trasy albo swiadomie podniesc limit miekki.
+Bezposredni tryb Routing API jest domyslnie wylaczony w
+`config/settings.yaml`, bo wymaga dodatkowego uprawnienia produktu i kazda
+trasa zuzywa dodatkowy request. Przy 24 punktach Flow co 15 minut dzienny plan
+wynosi 2304 requesty. Dwie trasy raz na godzine dodalyby 48 requestow, czyli
+laczenie 2352.
 
 Jednorazowy test tras:
 
@@ -310,6 +322,10 @@ Tabela `route_measurements` przechowuje pomiary z TomTom Routing API:
 - `delay_seconds`
 - `raw_json`
 
+Estymacje z punktow Flow nie sa trwale duplikowane w SQLite. Sa obliczane
+odtwarzalnie podczas generowania dashboardu i raportu dobowego na podstawie
+tabeli `measurements`.
+
 Tabela `fetch_runs` przechowuje log cykli pobierania, w tym planowany slot (`scheduled_slot_local`), faktyczny start (`started_at_local`), liczbe requestow, liczbe sukcesow i bledow.
 
 ## Wskazniki
@@ -340,12 +356,19 @@ delay_seconds = traffic_delay_seconds
 congestion_index = no_traffic_travel_time_seconds / travel_time_seconds
 ```
 
-W praktyce trasy odcinkowe sa lepszym wskaznikiem uzytkowego opoznienia niz pojedyncze punkty Flow, bo pokazuja, ile trwa przejazd przez caly badany fragment ulicy.
+Estymacja odcinkowa laczy wiele punktow Flow w jeden wskaznik uzytkowego
+opoznienia dla calego badanego fragmentu ulicy.
 
 ## Ograniczenia metodologiczne
 
 Projekt nie mierzy bezposrednio natezenia ruchu w pojazdach na godzine. Projekt mierzy warunki ruchu, predkosc biezaca, predkosc swobodna, czas przejazdu, opoznienie oraz wskazniki przeciazenia. Sa to wskazniki zastepcze, ktore moga byc uzyte do analizy zmiennosci warunkow ruchu na odcinku ulicznym.
 
 Dane z Flow Segment Data sa zalezne od dostepnosci i wiarygodnosci danych TomTom dla danego miejsca i momentu. Punkt pomiarowy jest przekazywany jako wspolrzedna, a API zwraca dane dla dopasowanego segmentu drogowego. Z tego powodu interpretacja wynikow powinna uwzgledniac mozliwe przesuniecie segmentu, zmiany organizacji ruchu, remonty, zdarzenia incydentalne oraz rozna jakosc danych w poszczegolnych porach dnia.
+
+Estymowany czas przejazdu calego odcinka jest wskaznikiem pochodnym z predkosci
+w punktach. Nie jest nawigacyjnym czasem przejazdu i moze nie obejmowac calego
+oczekiwania na sygnalizacji lub rondach, jezeli nie zostalo ono odzwierciedlone
+w predkosci segmentu Flow. Odleglosci sa przyblizane na podstawie wspolrzednych
+punktow, a nie pelnej geometrii osi jezdni.
 
 Jesli w godzinach szczytu punkty Flow nadal pokazuja stale `congestion_index = 1.0` i `delay_ratio = 1.0`, nie nalezy tego automatycznie traktowac jako dowodu braku korkow. Moze to oznaczac, ze Flow Segment Data ma za mala czulosc dla tych krotkich odcinkow. W takim przypadku bardziej wiarygodna dla badania bedzie analiza czasow przejazdu tras z Routing API albo uzupelnienie zrodla danych.

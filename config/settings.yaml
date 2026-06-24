@@ -25,6 +25,10 @@ routing:
   traffic: true
   raw_dir: "data/raw_routes"
 
+route_estimation:
+  enabled: true
+  require_all_points: true
+
 database:
   path: "data/awp_traffic.sqlite"
 

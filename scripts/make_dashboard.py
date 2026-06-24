@@ -28,6 +28,10 @@ from awp_traffic.database import (
     upsert_routes,
 )
 from awp_traffic.maps import create_points_map
+from awp_traffic.route_estimation import (
+    estimate_route_measurements,
+    merge_route_measurements,
+)
 
 
 def main() -> int:
@@ -62,13 +66,30 @@ def main() -> int:
         dashboard_maps_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(map_path, dashboard_maps_dir / "awp_points.html")
 
+    measurements = get_measurements_for_date(db_path, date_iso)
+    route_measurements = get_route_measurements_for_date(db_path, date_iso)
+    estimation_settings = settings.get("route_estimation", {})
+    if estimation_settings.get("enabled", True):
+        estimates = estimate_route_measurements(
+            routes=routes,
+            points=points,
+            measurements=measurements,
+            require_all_points=bool(
+                estimation_settings.get("require_all_points", True)
+            ),
+        )
+        route_measurements = merge_route_measurements(
+            estimates,
+            route_measurements,
+        )
+
     html_path, json_path = generate_dashboard(
         date_iso=date_iso,
         settings=settings,
         points=points,
         routes=routes,
-        measurements=get_measurements_for_date(db_path, date_iso),
-        route_measurements=get_route_measurements_for_date(db_path, date_iso),
+        measurements=measurements,
+        route_measurements=route_measurements,
         fetch_runs=get_fetch_runs_for_date(db_path, date_iso, limit=32),
         latest_run=get_latest_fetch_run(db_path),
         request_total=get_daily_request_total(db_path, date_iso),

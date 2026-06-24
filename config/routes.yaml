@@ -3,6 +3,15 @@ routes:
     name: "AWP: Plac Zwyciestwa -> Plac Szarych Szeregow"
     direction: "Plac Zwyciestwa -> Plac Szarych Szeregow"
     corridor_order: 1
+    point_ids:
+      - awp_p01_wjazd_od_placu_zwyciestwa
+      - awp_p02_miedzy_zgody_a_wjazdem
+      - awp_p03_przed_rondem_plac_zgody
+      - awp_p05_zjazd_zgody_do_jagiellonskiej
+      - awp_p06_miedzy_zgody_jagiellonska
+      - awp_p07_przed_jagiellonska
+      - awp_p08_jagiellonska_szarych_posrodku
+      - awp_p09_wyjazd_awp_szarych_szeregow
     coordinates:
       - latitude: 53.4261406
         longitude: 14.546218
@@ -17,6 +26,15 @@ routes:
     name: "AWP: Plac Szarych Szeregow -> Plac Zwyciestwa"
     direction: "Plac Szarych Szeregow -> Plac Zwyciestwa"
     corridor_order: 2
+    point_ids:
+      - awp_p10_wjazd_awp_z_szarych_szeregow
+      - awp_p11_miedzy_szarych_a_jagiellonska
+      - awp_p12_awp_jagiellonska_przed_skrzyzowaniem
+      - awp_p16_jagiellonska_plac_zgody_posrodku
+      - awp_p17_przed_zgody_od_szarych
+      - awp_p21_wyjazd_zgody_w_awp
+      - awp_p22_zgody_zwyciestwa_posrodku
+      - awp_p23_wyjazd_awp_plac_zwyciestwa
     coordinates:
       - latitude: 53.4326876
         longitude: 14.5404576
