@@ -39,6 +39,7 @@ def create_points_map(points: Iterable[dict[str, Any]], output_path: str | Path)
         popup = (
             f"<strong>{point.get('name', point.get('id'))}</strong><br>"
             f"Kierunek: {point.get('direction', 'brak')}<br>"
+            f"Rola ruchowa: {_traffic_role_label(point.get('traffic_role'))}<br>"
             f"{point.get('location_description', '')}"
         )
         folium.Marker(
@@ -58,3 +59,13 @@ def create_points_map(points: Iterable[dict[str, Any]], output_path: str | Path)
 
     traffic_map.save(output_path)
     return output_path
+
+
+def _traffic_role_label(value: Any) -> str:
+    return {
+        "corridor_inflow": "potencjalny doplyw do AWP",
+        "corridor_outflow": "potencjalny odplyw z AWP",
+        "side_inflow": "potencjalny doplyw boczny",
+        "side_outflow": "potencjalny odplyw boczny",
+        "junction_observation": "punkt wezlowy do weryfikacji",
+    }.get(str(value or ""), "punkt korytarzowy")

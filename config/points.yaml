@@ -6,6 +6,8 @@ points:
     direction: "Plac Zwyciestwa -> Plac Zgody"
     location_description: "Wjazd od Placu Zwyciestwa."
     corridor_order: 1
+    traffic_role: "corridor_inflow"
+    connection_name: "Plac Zwyciestwa"
 
   - id: awp_p02_miedzy_zgody_a_wjazdem
     name: "Punkt 2 - Miedzy Placem Zgody a wjazdem"
@@ -30,6 +32,8 @@ points:
     direction: "Baluki -> Plac Zgody"
     location_description: "Wjazd na Plac Zgody z ulicy Baluki."
     corridor_order: 4
+    traffic_role: "side_inflow"
+    connection_name: "ul. Baluki"
 
   - id: awp_p05_zjazd_zgody_do_jagiellonskiej
     name: "Punkt 5 - Zjazd z Placu Zgody w kierunku Jagiellonskiej"
@@ -70,6 +74,8 @@ points:
     direction: "AWP -> Plac Szarych Szeregow"
     location_description: "Wyjazd z AWP w rejonie ronda Plac Szarych Szeregow."
     corridor_order: 9
+    traffic_role: "corridor_outflow"
+    connection_name: "Plac Szarych Szeregow"
 
   - id: awp_p10_wjazd_awp_z_szarych_szeregow
     name: "Punkt 10 - Wjazd w AWP z Szarych Szeregow"
@@ -78,6 +84,8 @@ points:
     direction: "Plac Szarych Szeregow -> AWP"
     location_description: "Wjazd w AWP z ronda Plac Szarych Szeregow."
     corridor_order: 10
+    traffic_role: "corridor_inflow"
+    connection_name: "Plac Szarych Szeregow"
 
   - id: awp_p11_miedzy_szarych_a_jagiellonska
     name: "Punkt 11 - Pomiedzy Szarych Szeregow a Jagiellonska"
@@ -102,6 +110,8 @@ points:
     direction: "skrzyzowanie Jagiellonska/AWP"
     location_description: "Jagiellonska, skrzyzowanie z AWP; punkt do weryfikacji dopasowania segmentu TomTom."
     corridor_order: 13
+    traffic_role: "junction_observation"
+    connection_name: "ul. Jagiellonska"
 
   - id: awp_p14_jagiellonska_za_skrzyzowaniem
     name: "Punkt 14 - Jagiellonska za skrzyzowaniem z AWP"
@@ -110,6 +120,8 @@ points:
     direction: "Jagiellonska za skrzyzowaniem"
     location_description: "Jagiellonska za skrzyzowaniem z AWP; punkt do weryfikacji dopasowania segmentu TomTom."
     corridor_order: 14
+    traffic_role: "junction_observation"
+    connection_name: "ul. Jagiellonska"
 
   - id: awp_p15_jagiellonska_zjazd
     name: "Punkt 15 - Jagiellonska skrzyzowanie z AWP zjazd"
@@ -118,6 +130,8 @@ points:
     direction: "zjazd Jagiellonska/AWP"
     location_description: "Jagiellonska, skrzyzowanie z AWP, zjazd; punkt do weryfikacji dopasowania segmentu TomTom."
     corridor_order: 15
+    traffic_role: "junction_observation"
+    connection_name: "ul. Jagiellonska"
 
   - id: awp_p16_jagiellonska_plac_zgody_posrodku
     name: "Punkt 16 - Posrodku Jagiellonska - Plac Zgody"
@@ -142,6 +156,8 @@ points:
     direction: "Plac Zgody -> Bohaterow Getta"
     location_description: "Zjazd z Placu Zgody w ulice Bohaterow Getta Warszawskiego."
     corridor_order: 18
+    traffic_role: "side_outflow"
+    connection_name: "ul. Bohaterow Getta Warszawskiego"
 
   - id: awp_p19_zjazd_zgody_boguslawa
     name: "Punkt 19 - Zjazd z Placu Zgody w Boguslawa X"
@@ -150,6 +166,8 @@ points:
     direction: "Plac Zgody -> Boguslawa X"
     location_description: "Zjazd z Placu Zgody w ulice Boguslawa X."
     corridor_order: 19
+    traffic_role: "side_outflow"
+    connection_name: "ul. Boguslawa X"
 
   - id: awp_p20_wjazd_z_boguslawa
     name: "Punkt 20 - Wjazd na rondo Plac Zgody ze strony Boguslawa X"
@@ -158,6 +176,8 @@ points:
     direction: "Boguslawa X -> Plac Zgody"
     location_description: "Wjazd na rondo Plac Zgody ze strony ulicy Boguslawa X."
     corridor_order: 20
+    traffic_role: "side_inflow"
+    connection_name: "ul. Boguslawa X"
 
   - id: awp_p21_wyjazd_zgody_w_awp
     name: "Punkt 21 - Wyjazd z ronda Plac Zgody w AWP"
@@ -182,6 +202,8 @@ points:
     direction: "AWP -> Plac Zwyciestwa"
     location_description: "Wyjazd z AWP w kierunku Placu Zwyciestwa."
     corridor_order: 23
+    traffic_role: "corridor_outflow"
+    connection_name: "Plac Zwyciestwa"
 
   - id: awp_p24_z_placu_zgody_w_baluki
     name: "Punkt 24 - Z Placu Zgody w Baluki"
@@ -190,3 +212,5 @@ points:
     direction: "Plac Zgody -> Baluki"
     location_description: "Zjazd z Placu Zgody w ulice Baluki."
     corridor_order: 24
+    traffic_role: "side_outflow"
+    connection_name: "ul. Baluki"

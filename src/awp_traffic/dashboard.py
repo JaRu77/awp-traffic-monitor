@@ -58,6 +58,8 @@ def generate_dashboard(
     missing_slots_so_far = max(0, expected_slots_so_far - slot_count)
     latest_measurements = _latest_measurements_by_point(measurements)
     latest_route_measurements = _latest_measurements_by_route(route_measurements)
+    route_speed_statistics = _route_speed_statistics(route_measurements)
+    access_point_statistics = _access_point_statistics(points, measurements)
     latest_timestamp = _latest_timestamp(measurements)
     latest_route_timestamp = _latest_route_timestamp(route_measurements)
     latest_slot = _latest_slot(measurements, latest_run)
@@ -90,6 +92,8 @@ def generate_dashboard(
         "latest_scheduled_slot": latest_slot,
         "latest_run_status": latest_run.get("status") if latest_run else None,
         "worst_point": worst_point,
+        "route_speed_statistics": list(route_speed_statistics.values()),
+        "access_point_statistics": access_point_statistics,
     }
 
     html = _build_html(
@@ -102,6 +106,8 @@ def generate_dashboard(
         generated_at=generated_at,
         latest_measurements=latest_measurements,
         latest_route_measurements=latest_route_measurements,
+        route_speed_statistics=route_speed_statistics,
+        access_point_statistics=access_point_statistics,
         latest_run=latest_run,
         fetch_runs=fetch_runs,
         request_total=request_total,
@@ -138,6 +144,8 @@ def _build_html(
     generated_at: str,
     latest_measurements: list[dict[str, Any]],
     latest_route_measurements: list[dict[str, Any]],
+    route_speed_statistics: dict[str, dict[str, Any]],
+    access_point_statistics: list[dict[str, Any]],
     latest_run: dict[str, Any] | None,
     fetch_runs: list[dict[str, Any]],
     request_total: int,
@@ -268,7 +276,13 @@ def _build_html(
     <section>
       <h2>Estymowane czasy przejazdu odcinkow</h2>
       <p class="muted">Wyniki pochodne z predkosci Flow w punktach korytarzowych; bez dodatkowych zapytan do API.</p>
-      {_routes_table(routes, latest_route_measurements)}
+      {_routes_table(routes, latest_route_measurements, route_speed_statistics)}
+    </section>
+
+    <section>
+      <h2>Potencjalne doplywy i odplywy ruchu</h2>
+      <p class="muted">Klasyfikacja wynika z polozenia i kierunku punktu. Predkosci moga pokazac pogorszenie warunkow na wlocie lub wylocie, ale nie okreslaja liczby pojazdow.</p>
+      {_access_points_table(access_point_statistics)}
     </section>
 
     <section>
@@ -352,7 +366,11 @@ def _latest_table(points: list[dict[str, Any]], latest_measurements: list[dict[s
     )
 
 
-def _routes_table(routes: list[dict[str, Any]], latest_route_measurements: list[dict[str, Any]]) -> str:
+def _routes_table(
+    routes: list[dict[str, Any]],
+    latest_route_measurements: list[dict[str, Any]],
+    route_speed_statistics: dict[str, dict[str, Any]],
+) -> str:
     if not routes:
         return '<p class="muted">Brak skonfigurowanych tras odcinkowych.</p>'
 
@@ -360,6 +378,7 @@ def _routes_table(routes: list[dict[str, Any]], latest_route_measurements: list[
     rows = []
     for route in sorted(routes, key=lambda item: item.get("corridor_order") or 0):
         row = by_route.get(route.get("id"))
+        statistics = route_speed_statistics.get(str(route.get("id")), {})
         if row:
             interpretation = interpret_conditions(
                 _to_float(row.get("congestion_index")),
@@ -376,6 +395,10 @@ def _routes_table(routes: list[dict[str, Any]], latest_route_measurements: list[
                 f"<td>{_fmt(row.get('delay_seconds'))}</td>"
                 f"<td>{_fmt(row.get('delay_ratio'))}</td>"
                 f"<td>{_fmt(row.get('average_speed_kmh'))}</td>"
+                f"<td>{_fmt(statistics.get('average_speed_mean'))}</td>"
+                f"<td>{_fmt(statistics.get('average_speed_min'))}</td>"
+                f"<td>{_fmt(statistics.get('average_speed_max'))}</td>"
+                f"<td>{escape(str(statistics.get('measurements', 0)))}</td>"
                 f"<td>{escape(interpretation)}</td>"
                 f"<td>{escape(_route_source_label(row))}</td>"
                 f"<td>{escape(_short_datetime(row.get('measurement_slot_local') or row.get('timestamp_local')))}</td>"
@@ -388,14 +411,15 @@ def _routes_table(routes: list[dict[str, Any]], latest_route_measurements: list[
                 f"<td>{escape(str(route.get('corridor_order', '')))}</td>"
                 f"<td>{escape(str(route.get('name', '')))}</td>"
                 f"<td>{escape(str(route.get('direction', '')))}</td>"
-                '<td colspan="9" class="muted">Brak estymacji trasy dzisiaj</td>'
+                '<td colspan="13" class="muted">Brak estymacji trasy dzisiaj</td>'
                 "</tr>"
             )
 
     return (
         "<table><thead><tr>"
         "<th>#</th><th>Trasa</th><th>Kierunek</th><th>Czas teraz s</th><th>Czas bez ruchu s</th>"
-        "<th>Opozn. s</th><th>Opozn. ratio</th><th>V srednia km/h</th><th>Interpretacja</th>"
+        "<th>Opozn. s</th><th>Opozn. ratio</th><th>V teraz</th><th>V sr. dzis</th>"
+        "<th>V min dzis</th><th>V max dzis</th><th>N</th><th>Interpretacja</th>"
         "<th>Zrodlo</th><th>Slot</th><th>Pobrano</th>"
         "</tr></thead><tbody>"
         + "".join(rows)
@@ -463,6 +487,87 @@ def _latest_route_timestamp(route_measurements: list[dict[str, Any]]) -> str | N
     return max(timestamps) if timestamps else None
 
 
+def _route_speed_statistics(
+    route_measurements: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    grouped: dict[str, list[float]] = {}
+    for row in route_measurements:
+        route_id = str(row.get("route_id") or "")
+        speed = _to_float(row.get("average_speed_kmh"))
+        if route_id and speed is not None:
+            grouped.setdefault(route_id, []).append(speed)
+
+    return {
+        route_id: {
+            "route_id": route_id,
+            "average_speed_mean": sum(speeds) / len(speeds),
+            "average_speed_min": min(speeds),
+            "average_speed_max": max(speeds),
+            "measurements": len(speeds),
+        }
+        for route_id, speeds in grouped.items()
+    }
+
+
+def _access_point_statistics(
+    points: list[dict[str, Any]],
+    measurements: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    access_roles = {
+        "corridor_inflow",
+        "corridor_outflow",
+        "side_inflow",
+        "side_outflow",
+        "junction_observation",
+    }
+    measurements_by_point: dict[str, list[dict[str, Any]]] = {}
+    for measurement in measurements:
+        point_id = str(measurement.get("point_id") or "")
+        if point_id:
+            measurements_by_point.setdefault(point_id, []).append(measurement)
+
+    result = []
+    for point in sorted(points, key=lambda item: item.get("corridor_order") or 0):
+        role = str(point.get("traffic_role") or "")
+        if role not in access_roles:
+            continue
+        point_measurements = measurements_by_point.get(str(point.get("id")), [])
+        latest = max(
+            point_measurements,
+            key=lambda row: str(
+                row.get("measurement_slot_local")
+                or row.get("timestamp_local")
+                or ""
+            ),
+            default={},
+        )
+        speeds = [
+            speed
+            for speed in (
+                _to_float(row.get("current_speed"))
+                for row in point_measurements
+            )
+            if speed is not None
+        ]
+        result.append(
+            {
+                "point_id": point.get("id"),
+                "point_name": point.get("name"),
+                "corridor_order": point.get("corridor_order"),
+                "traffic_role": role,
+                "connection_name": point.get("connection_name"),
+                "direction": point.get("direction"),
+                "current_speed": latest.get("current_speed"),
+                "average_speed_today": (
+                    sum(speeds) / len(speeds) if speeds else None
+                ),
+                "congestion_index": latest.get("congestion_index"),
+                "measurements": len(point_measurements),
+            }
+        )
+    return result
+
+
 def _route_source_label(row: dict[str, Any]) -> str:
     label = str(row.get("source_label") or "TomTom Routing API")
     used = row.get("points_used")
@@ -470,6 +575,16 @@ def _route_source_label(row: dict[str, Any]) -> str:
     if used is not None and expected is not None:
         return f"{label} ({used}/{expected} pkt)"
     return label
+
+
+def _traffic_role_label(value: Any) -> str:
+    return {
+        "corridor_inflow": "doplyw na AWP",
+        "corridor_outflow": "odplyw z AWP",
+        "side_inflow": "doplyw boczny",
+        "side_outflow": "odplyw boczny",
+        "junction_observation": "wezel do weryfikacji",
+    }.get(str(value or ""), "brak")
 
 
 def _expected_daily_requests(
@@ -491,6 +606,35 @@ def _expected_daily_requests(
         else 0
     )
     return points_count * point_runs + routes_count * route_runs
+
+
+def _access_points_table(access_point_statistics: list[dict[str, Any]]) -> str:
+    if not access_point_statistics:
+        return '<p class="muted">Brak skonfigurowanych punktow dostepowych.</p>'
+
+    rows = []
+    for row in access_point_statistics:
+        rows.append(
+            "<tr>"
+            f"<td>{escape(str(row.get('corridor_order', '')))}</td>"
+            f"<td>{escape(str(row.get('point_name', '')))}</td>"
+            f"<td>{escape(str(row.get('connection_name', '')))}</td>"
+            f"<td>{escape(_traffic_role_label(row.get('traffic_role')))}</td>"
+            f"<td>{escape(str(row.get('direction', '')))}</td>"
+            f"<td>{_fmt(row.get('current_speed'))}</td>"
+            f"<td>{_fmt(row.get('average_speed_today'))}</td>"
+            f"<td>{_fmt(row.get('congestion_index'))}</td>"
+            f"<td>{escape(str(row.get('measurements', 0)))}</td>"
+            "</tr>"
+        )
+    return (
+        "<table><thead><tr>"
+        "<th>#</th><th>Punkt</th><th>Polaczenie</th><th>Rola</th><th>Kierunek</th>"
+        "<th>V teraz</th><th>V sr. dzis</th><th>Indeks teraz</th><th>N</th>"
+        "</tr></thead><tbody>"
+        + "".join(rows)
+        + "</tbody></table>"
+    )
 
 
 def _completed_slot_count(measurements: list[dict[str, Any]], interval_minutes: int) -> int:

@@ -41,6 +41,7 @@ Punkty sa zdefiniowane w `config/points.yaml`. Kazdy punkt zawiera:
 - `direction`
 - `location_description`
 - `corridor_order`
+- opcjonalne `traffic_role` i `connection_name` dla wlotow, wylotow i punktow wezlowych
 
 Wspolrzedne nalezy traktowac jako punkty orientacyjne dla endpointu Flow Segment Data. Przed dluzszym monitoringiem warto zweryfikowac, czy TomTom przypisuje je do oczekiwanych segmentow ulicznych.
 
@@ -370,5 +371,12 @@ w punktach. Nie jest nawigacyjnym czasem przejazdu i moze nie obejmowac calego
 oczekiwania na sygnalizacji lub rondach, jezeli nie zostalo ono odzwierciedlone
 w predkosci segmentu Flow. Odleglosci sa przyblizane na podstawie wspolrzednych
 punktow, a nie pelnej geometrii osi jezdni.
+
+Role `corridor_inflow`, `corridor_outflow`, `side_inflow` i `side_outflow`
+opisuja topologie punktu, a nie zmierzone natezenie. Flow Segment Data pozwala
+obserwowac predkosc i pogorszenie warunkow na wlocie lub wylocie, ale nie
+pozwala wiarygodnie wyliczyc liczby pojazdow wjezdzajacych i wyjezdzajacych.
+Do bilansu doplywow i odplywow w pojazdach na godzine potrzebne bylyby petle
+indukcyjne, kamery z detekcja, radary lub inne liczniki ruchu.
 
 Jesli w godzinach szczytu punkty Flow nadal pokazuja stale `congestion_index = 1.0` i `delay_ratio = 1.0`, nie nalezy tego automatycznie traktowac jako dowodu braku korkow. Moze to oznaczac, ze Flow Segment Data ma za mala czulosc dla tych krotkich odcinkow. W takim przypadku bardziej wiarygodna dla badania bedzie analiza czasow przejazdu tras z Routing API albo uzupelnienie zrodla danych.
