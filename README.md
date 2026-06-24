@@ -132,6 +132,23 @@ Eksport danych do CSV:
 python scripts/export_csv.py --date 2026-06-22
 ```
 
+Eksport kompletnego pakietu badawczego:
+
+```bash
+python scripts/export_research_package.py
+```
+
+Powstaje `reports/downloads/awp_research_latest.zip` zawierajacy:
+
+- wszystkie pomiary punktow w `measurements.csv`,
+- estymacje tras w `route_estimates.csv`,
+- log jakosci w `fetch_runs.csv`,
+- konfiguracje punktow i tras,
+- metadane i opis metodologiczny.
+
+Pakiet nie zawiera `.env`, klucza API ani pelnego `raw_json`. Na serwerze jest
+odswiezany raz dziennie i dostepny przez link na dashboardzie.
+
 Testy:
 
 ```bash

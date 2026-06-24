@@ -396,6 +396,21 @@ def get_measurements_for_date(
     return [_row_to_dict(row) for row in rows]
 
 
+def get_all_measurements(db_path: str | Path) -> list[dict[str, Any]]:
+    """Return all point measurements in chronological order."""
+
+    init_db(db_path)
+    with connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT *
+            FROM measurements
+            ORDER BY timestamp_local, point_id
+            """
+        ).fetchall()
+    return [_row_to_dict(row) for row in rows]
+
+
 def get_route_measurements_for_date(
     db_path: str | Path,
     date_iso: str,
@@ -412,6 +427,21 @@ def get_route_measurements_for_date(
             ORDER BY timestamp_local, route_id
             """,
             (date_iso,),
+        ).fetchall()
+    return [_row_to_dict(row) for row in rows]
+
+
+def get_all_route_measurements(db_path: str | Path) -> list[dict[str, Any]]:
+    """Return all direct Routing API measurements in chronological order."""
+
+    init_db(db_path)
+    with connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT *
+            FROM route_measurements
+            ORDER BY timestamp_local, route_id
+            """
         ).fetchall()
     return [_row_to_dict(row) for row in rows]
 
@@ -438,6 +468,21 @@ def get_fetch_runs_for_date(
 
     with connect(db_path) as connection:
         rows = connection.execute(sql, params).fetchall()
+    return [_row_to_dict(row) for row in rows]
+
+
+def get_all_fetch_runs(db_path: str | Path) -> list[dict[str, Any]]:
+    """Return the complete fetch-run quality log."""
+
+    init_db(db_path)
+    with connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT *
+            FROM fetch_runs
+            ORDER BY started_at_local
+            """
+        ).fetchall()
     return [_row_to_dict(row) for row in rows]
 
 

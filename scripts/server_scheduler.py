@@ -39,6 +39,9 @@ def main() -> int:
     routes_interval_minutes = int(routing_settings.get("measurement_interval_minutes", 60))
     dashboard_enabled = bool(server_settings.get("generate_dashboard_after_cycle", True)) and not args.skip_dashboard
     daily_enabled = bool(server_settings.get("generate_daily_report", True)) and not args.skip_daily_report
+    research_export_enabled = bool(
+        server_settings.get("generate_research_export", True)
+    )
     daily_report_time = str(server_settings.get("daily_report_time", "00:20"))
 
     _log("Start serwerowego schedulera AWP.")
@@ -56,6 +59,7 @@ def main() -> int:
             routes_interval_minutes=routes_interval_minutes,
             dashboard_enabled=dashboard_enabled,
             daily_enabled=daily_enabled,
+            research_export_enabled=research_export_enabled,
             daily_report_time=daily_report_time,
             local_zone=local_zone,
             last_daily_report_date=None,
@@ -74,6 +78,7 @@ def main() -> int:
             routes_interval_minutes=routes_interval_minutes,
             dashboard_enabled=dashboard_enabled,
             daily_enabled=daily_enabled,
+            research_export_enabled=research_export_enabled,
             daily_report_time=daily_report_time,
             local_zone=local_zone,
             last_daily_report_date=last_daily_report_date,
@@ -86,6 +91,7 @@ def _run_cycle(
     routes_interval_minutes: int,
     dashboard_enabled: bool,
     daily_enabled: bool,
+    research_export_enabled: bool,
     daily_report_time: str,
     local_zone: ZoneInfo,
     last_daily_report_date: str | None,
@@ -105,6 +111,12 @@ def _run_cycle(
     if daily_enabled and _should_make_daily_report(started, daily_report_time, last_daily_report_date):
         report_date = (started.date() - timedelta(days=1)).isoformat()
         exit_codes.append(_run_command([sys.executable, "scripts/make_daily_report.py", "--date", report_date]))
+        if research_export_enabled:
+            exit_codes.append(
+                _run_command(
+                    [sys.executable, "scripts/export_research_package.py"]
+                )
+            )
         last_daily_report_date = report_date
 
     failed = [code for code in exit_codes if code != 0]

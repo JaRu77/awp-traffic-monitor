@@ -298,10 +298,12 @@ def _build_html(
     <section>
       <h2>Linki operacyjne</h2>
       <div class="links">
+        <a href="../downloads/awp_research_latest.zip" download>Pobierz pakiet badawczy ZIP</a>
         <a href="../daily/">Raporty dobowe</a>
         <a href="../maps/awp_points.html">Mapa punktow</a>
         <a href="status.json">Status JSON</a>
       </div>
+      <p class="muted">Pakiet ZIP zawiera wszystkie pomiary CSV, estymacje tras, log jakosci oraz konfiguracje punktow. Jest odswiezany raz dziennie lub po recznym eksporcie.</p>
       <p class="muted">Sterowanie harmonogramem odbywa sie w GitHub Actions. Zatrzymanie awaryjne: ustaw monitoring.enabled: false w config/settings.yaml.</p>
     </section>
   </main>

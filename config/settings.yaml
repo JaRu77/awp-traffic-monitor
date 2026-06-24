@@ -49,6 +49,7 @@ dashboard:
 server:
   generate_dashboard_after_cycle: true
   generate_daily_report: true
+  generate_research_export: true
   daily_report_time: "00:20"
 
 email:
