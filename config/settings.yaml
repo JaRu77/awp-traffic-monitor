@@ -1,11 +1,11 @@
 project:
   name: "Monitoring warunkow ruchu na al. Wojska Polskiego w Szczecinie"
   timezone: "Europe/Warsaw"
-  measurement_interval_minutes: 15
+  measurement_interval_minutes: 60
 
 monitoring:
   enabled: true
-  daily_request_soft_limit: 2400
+  daily_request_soft_limit: 600
   expected_points: 24
 
 tomtom:
@@ -44,7 +44,7 @@ dashboard:
   title: "Pulpit monitoringu AWP"
   output_dir: "reports/dashboard"
   refresh_seconds: 300
-  request_limit_reference: 2500
+  request_limit_reference: 600
 
 server:
   generate_dashboard_after_cycle: true

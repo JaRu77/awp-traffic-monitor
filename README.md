@@ -49,10 +49,10 @@ Wspolrzedne nalezy traktowac jako punkty orientacyjne dla endpointu Flow Segment
 
 Trasy sa zdefiniowane w `config/routes.yaml`. Ten plik sluzy do pomiaru czasu przejazdu calym odcinkiem, np. `Plac Zwyciestwa -> Plac Szarych Szeregow`, zamiast oceny pojedynczego punktu.
 
-Na serwerze punkty sa domyslnie mierzone co 15 minut. Trasy mozna wlaczyc
+Na serwerze punkty sa domyslnie mierzone co 60 minut. Trasy mozna wlaczyc
 ustawieniem `routing.enabled: true`; wtedy sa mierzone raz na godzine, zgodnie
 z `routing.measurement_interval_minutes: 60`. Przy 24 punktach i 2 trasach
-daje to 2352 zapytania na typowa dobe.
+daje to 624 zapytania na typowa dobe.
 
 Niezaleznie od Routing API projekt domyslnie estymuje czasy obu kierunkow AWP
 z juz pobranych predkosci Flow (`route_estimation.enabled: true`). Punkty
@@ -72,9 +72,9 @@ Kazda trasa zawiera:
 
 Bezposredni tryb Routing API jest domyslnie wylaczony w
 `config/settings.yaml`, bo wymaga dodatkowego uprawnienia produktu i kazda
-trasa zuzywa dodatkowy request. Przy 24 punktach Flow co 15 minut dzienny plan
-wynosi 2304 requesty. Dwie trasy raz na godzine dodalyby 48 requestow, czyli
-laczenie 2352.
+trasa zuzywa dodatkowy request. Przy 24 punktach Flow co 60 minut dzienny plan
+wynosi 576 requestow. Dwie trasy raz na godzine dodalyby 48 requestow, czyli
+laczenie 624.
 
 Jednorazowy test tras:
 
@@ -157,9 +157,9 @@ python -m pytest
 
 ## GitHub Actions
 
-Workflow `hourly.yml` dziala jako watchdog co 5 minut wedlug harmonogramu `*/5 * * * *`, ale zapisuje dane do 15-minutowych slotow pomiarowych. Jesli slot, np. `06:30`, jest juz kompletny dla wszystkich punktow, kolejne uruchomienie nie odpytuje TomTom API i nie zuzywa limitu.
+Workflow `hourly.yml` pozostaje dostepny tylko do recznego uruchomienia awaryjnego. Automatyczne pomiary wykonuje VPS i zapisuje dane do godzinnych slotow pomiarowych.
 
-Przy 24 punktach pomiarowych i kompletnych slotach co 15 minut plan wynosi okolo 2304 zapytan dziennie, czyli ponizej limitu referencyjnego 2500 zapytan dziennie.
+Przy 24 punktach pomiarowych i kompletnych slotach co 60 minut plan wynosi 576 zapytan dziennie. Daje to 17 280 zapytan w miesiacu 30-dniowym i pozostaje ponizej bezplatnego limitu 20 000 zapytan miesiecznie.
 
 GitHub Actions moze uruchomic zaplanowany cykl z opoznieniem kilku minut, a sporadycznie moze pominac zaplanowany cykl. To jest wystarczajace do prototypu i obserwacji trendow, ale nie jest zegarem laboratoryjnym. Dlatego baza zapisuje dwa rodzaje czasu:
 
@@ -236,7 +236,7 @@ W repozytorium GitHub dodaj sekret:
 TOMTOM_API_KEY
 ```
 
-Oba workflow maja uprawnienie `contents: write`, aby commitowac zebrane dane i wygenerowane raporty do repozytorium. Dla wiekszego projektu badawczego lepszym miejscem na dane moze byc zewnetrzny storage albo baza poza repozytorium. Pushowanie pliku SQLite i wielu JSON-ow do Gita co 15 minut jest rozwiazaniem prototypowym, podatnym na konflikty i rozrost historii repozytorium.
+Oba workflow maja uprawnienie `contents: write`, aby commitowac zebrane dane i wygenerowane raporty do repozytorium. Dla wiekszego projektu badawczego lepszym miejscem na dane moze byc zewnetrzny storage albo baza poza repozytorium. Pushowanie pliku SQLite i wielu JSON-ow do Gita co godzine jest rozwiazaniem prototypowym, podatnym na konflikty i rozrost historii repozytorium.
 
 ## Kontrola pracy 24/7
 
@@ -253,7 +253,7 @@ Najwazniejsze ustawienia sa w `config/settings.yaml`:
 ```yaml
 monitoring:
   enabled: true
-  daily_request_soft_limit: 2400
+  daily_request_soft_limit: 600
 ```
 
 Zatrzymanie monitoringu bez usuwania workflow:
@@ -272,16 +272,10 @@ monitoring:
 
 Limit `daily_request_soft_limit` jest bezpiecznikiem. Jesli kolejny cykl mialby przekroczyc limit miekki, skrypt pominie pobieranie i zapisze status `skipped_limit` w tabeli `fetch_runs`.
 
-Reczne zatrzymanie pojedynczego uruchomienia:
-
-```text
-GitHub -> Actions -> Traffic fetch every 15 minutes -> Cancel workflow
-```
-
 Reczne uruchomienie:
 
 ```text
-GitHub -> Actions -> Traffic fetch every 15 minutes -> Run workflow
+GitHub -> Actions -> Traffic fetch watchdog -> Run workflow
 ```
 
 Do kontroli zuzycia API uzywaj jednoczesnie:

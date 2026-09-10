@@ -10,21 +10,21 @@ from awp_traffic.dashboard import (
 def test_daily_request_plan_includes_hourly_routes():
     assert _expected_daily_requests(
         points_count=24,
-        point_interval_minutes=15,
+        point_interval_minutes=60,
         routes_count=2,
         route_interval_minutes=60,
         routes_enabled=True,
-    ) == 2352
+    ) == 624
 
 
 def test_daily_request_plan_ignores_disabled_routes():
     assert _expected_daily_requests(
         points_count=24,
-        point_interval_minutes=15,
+        point_interval_minutes=60,
         routes_count=2,
         route_interval_minutes=60,
         routes_enabled=False,
-    ) == 2304
+    ) == 576
 
 
 def test_route_speed_statistics_calculate_daily_mean_min_and_max():

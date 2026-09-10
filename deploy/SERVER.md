@@ -22,24 +22,20 @@ Polskie lub wygodne dla uzytkownika z Polski opcje:
 
 Do tego projektu nie potrzebujesz serwera dedykowanego ani uslug zarzadzanych. Wystarczy zwykly VPS z Ubuntu.
 
-## Bardzo wazne: GitHub i serwer jednoczesnie
+## Jedno aktywne zrodlo pomiarow
 
-Nie wylaczamy teraz GitHub Actions. Ale gdy uruchomisz serwer 24/7 i zostawisz GitHuba jako aktywnego zbieracza, zuzycie TomTom API sie podwoi.
+Automatyczne pomiary wykonuje tylko VPS. Workflow GitHub Actions pozostaje
+dostepny do recznego uruchomienia awaryjnego.
 
 Przy 24 punktach:
 
 ```text
-GitHub: 24 x 96 = 2304 requesty/dobe
-Serwer: 24 x 96 = 2304 requesty/dobe
-Razem: 4608 requestow/dobe
+Serwer: 24 x 24 = 576 requestow/dobe
+Miesiac 30-dniowy: 17 280 requestow
 ```
 
-To przekroczy darmowy limit. Dlatego plan migracji jest taki:
-
-1. GitHub zostaje wlaczony podczas przygotowania serwera.
-2. Na serwerze robisz test `--once`.
-3. Potem robisz test 1-2 slotow.
-4. Dopiero po potwierdzeniu, ze serwer dziala, wybierasz jedno aktywne zrodlo pobierania danych.
+Nie uruchamiaj cyklicznego zbierania jednoczesnie na GitHubie i VPS, poniewaz
+podwoiloby to zuzycie API.
 
 ## Wariant A: Docker Compose
 
@@ -209,8 +205,8 @@ sudo systemctl restart awp-traffic-dashboard.service
 
 Domyslnie `routing.enabled` jest `false`, aby brak uprawnienia Routing API nie
 zaklocal podstawowych pomiarow. Po wlaczeniu trasy sa mierzone tylko raz na
-godzine (`routing.measurement_interval_minutes: 60`). Punkty pozostaja mierzone
-co 15 minut. Przy 24 punktach i 2 trasach plan wynosi 2352 zapytania na typowa
+godzine (`routing.measurement_interval_minutes: 60`). Punkty sa mierzone
+co 60 minut. Przy 24 punktach i 2 trasach plan wynosi 624 zapytania na typowa
 dobe.
 
 Dashboard i raport dobowy domyslnie wyliczaja takze estymowane czasy przejazdu
@@ -239,8 +235,8 @@ routing:
 ```
 
 Przy 24 punktach Flow i 2 trasach Routing API raz na godzine plan dzienny
-wynosi 2352 requesty. Sama estymacja z punktow pozostawia plan na poziomie
-2304 requestow.
+wynosi 624 requesty. Sama estymacja z punktow pozostawia plan na poziomie
+576 requestow.
 
 ## Raport email raz dziennie
 
