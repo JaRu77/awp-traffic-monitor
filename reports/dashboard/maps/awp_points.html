@@ -3,13 +3,12 @@
 <head>
     
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
@@ -17,10 +16,11 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_3b53e90f772667b206c27b0b8b313365 {
+                #map_359fbc4a34a0f64f80de8b8ffd09fa85 {
                     position: relative;
-                    width: 100.0%;
-                    height: 100.0%;
+                    width: 100.0vw;
+                    height: 100.0vh;
+
                     left: 0.0%;
                     top: 0.0%;
                 }
@@ -35,14 +35,218 @@
             }
             </style>
 
-            <style>#map {
-                position:absolute;
-                top:0;
-                bottom:0;
-                right:0;
-                left:0;
-                }
-            </style>
+            <style>/*
+ * Glyphicons Halflings -- the icon font used by folium's default Awesome Markers
+ * (Icon(prefix="glyphicon")). Extracted from Bootstrap 3's glyphicon rules only.
+ *
+ * folium previously loaded netdna's bootstrap-glyphicons.css, which despite its
+ * name ships a full Bootstrap-3 base stylesheet (normalize reset + global `body`
+ * rules) that leaked onto the host page (GH-1820). This file provides just the
+ * @font-face and .glyphicon/.glyphicon-* rules needed for the markers, with no
+ * page-wide side effects. Font files are served from jsDelivr.
+ */
+@font-face{font-family:'Glyphicons Halflings';src:url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.eot');src:url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'),url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.woff') format('woff'),url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.ttf') format('truetype'),url('https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');}.glyphicon{position:relative;top:1px;display:inline-block;font-family:'Glyphicons Halflings';font-style:normal;font-weight:normal;line-height:1;-webkit-font-smoothing:antialiased;}
+.glyphicon-asterisk:before{content:"\2a";}
+.glyphicon-plus:before{content:"\2b";}
+.glyphicon-euro:before{content:"\20ac";}
+.glyphicon-minus:before{content:"\2212";}
+.glyphicon-cloud:before{content:"\2601";}
+.glyphicon-envelope:before{content:"\2709";}
+.glyphicon-pencil:before{content:"\270f";}
+.glyphicon-glass:before{content:"\e001";}
+.glyphicon-music:before{content:"\e002";}
+.glyphicon-search:before{content:"\e003";}
+.glyphicon-heart:before{content:"\e005";}
+.glyphicon-star:before{content:"\e006";}
+.glyphicon-star-empty:before{content:"\e007";}
+.glyphicon-user:before{content:"\e008";}
+.glyphicon-film:before{content:"\e009";}
+.glyphicon-th-large:before{content:"\e010";}
+.glyphicon-th:before{content:"\e011";}
+.glyphicon-th-list:before{content:"\e012";}
+.glyphicon-ok:before{content:"\e013";}
+.glyphicon-remove:before{content:"\e014";}
+.glyphicon-zoom-in:before{content:"\e015";}
+.glyphicon-zoom-out:before{content:"\e016";}
+.glyphicon-off:before{content:"\e017";}
+.glyphicon-signal:before{content:"\e018";}
+.glyphicon-cog:before{content:"\e019";}
+.glyphicon-trash:before{content:"\e020";}
+.glyphicon-home:before{content:"\e021";}
+.glyphicon-file:before{content:"\e022";}
+.glyphicon-time:before{content:"\e023";}
+.glyphicon-road:before{content:"\e024";}
+.glyphicon-download-alt:before{content:"\e025";}
+.glyphicon-download:before{content:"\e026";}
+.glyphicon-upload:before{content:"\e027";}
+.glyphicon-inbox:before{content:"\e028";}
+.glyphicon-play-circle:before{content:"\e029";}
+.glyphicon-repeat:before{content:"\e030";}
+.glyphicon-refresh:before{content:"\e031";}
+.glyphicon-list-alt:before{content:"\e032";}
+.glyphicon-flag:before{content:"\e034";}
+.glyphicon-headphones:before{content:"\e035";}
+.glyphicon-volume-off:before{content:"\e036";}
+.glyphicon-volume-down:before{content:"\e037";}
+.glyphicon-volume-up:before{content:"\e038";}
+.glyphicon-qrcode:before{content:"\e039";}
+.glyphicon-barcode:before{content:"\e040";}
+.glyphicon-tag:before{content:"\e041";}
+.glyphicon-tags:before{content:"\e042";}
+.glyphicon-book:before{content:"\e043";}
+.glyphicon-print:before{content:"\e045";}
+.glyphicon-font:before{content:"\e047";}
+.glyphicon-bold:before{content:"\e048";}
+.glyphicon-italic:before{content:"\e049";}
+.glyphicon-text-height:before{content:"\e050";}
+.glyphicon-text-width:before{content:"\e051";}
+.glyphicon-align-left:before{content:"\e052";}
+.glyphicon-align-center:before{content:"\e053";}
+.glyphicon-align-right:before{content:"\e054";}
+.glyphicon-align-justify:before{content:"\e055";}
+.glyphicon-list:before{content:"\e056";}
+.glyphicon-indent-left:before{content:"\e057";}
+.glyphicon-indent-right:before{content:"\e058";}
+.glyphicon-facetime-video:before{content:"\e059";}
+.glyphicon-picture:before{content:"\e060";}
+.glyphicon-map-marker:before{content:"\e062";}
+.glyphicon-adjust:before{content:"\e063";}
+.glyphicon-tint:before{content:"\e064";}
+.glyphicon-edit:before{content:"\e065";}
+.glyphicon-share:before{content:"\e066";}
+.glyphicon-check:before{content:"\e067";}
+.glyphicon-move:before{content:"\e068";}
+.glyphicon-step-backward:before{content:"\e069";}
+.glyphicon-fast-backward:before{content:"\e070";}
+.glyphicon-backward:before{content:"\e071";}
+.glyphicon-play:before{content:"\e072";}
+.glyphicon-pause:before{content:"\e073";}
+.glyphicon-stop:before{content:"\e074";}
+.glyphicon-forward:before{content:"\e075";}
+.glyphicon-fast-forward:before{content:"\e076";}
+.glyphicon-step-forward:before{content:"\e077";}
+.glyphicon-eject:before{content:"\e078";}
+.glyphicon-chevron-left:before{content:"\e079";}
+.glyphicon-chevron-right:before{content:"\e080";}
+.glyphicon-plus-sign:before{content:"\e081";}
+.glyphicon-minus-sign:before{content:"\e082";}
+.glyphicon-remove-sign:before{content:"\e083";}
+.glyphicon-ok-sign:before{content:"\e084";}
+.glyphicon-question-sign:before{content:"\e085";}
+.glyphicon-info-sign:before{content:"\e086";}
+.glyphicon-screenshot:before{content:"\e087";}
+.glyphicon-remove-circle:before{content:"\e088";}
+.glyphicon-ok-circle:before{content:"\e089";}
+.glyphicon-ban-circle:before{content:"\e090";}
+.glyphicon-arrow-left:before{content:"\e091";}
+.glyphicon-arrow-right:before{content:"\e092";}
+.glyphicon-arrow-up:before{content:"\e093";}
+.glyphicon-arrow-down:before{content:"\e094";}
+.glyphicon-share-alt:before{content:"\e095";}
+.glyphicon-resize-full:before{content:"\e096";}
+.glyphicon-resize-small:before{content:"\e097";}
+.glyphicon-exclamation-sign:before{content:"\e101";}
+.glyphicon-gift:before{content:"\e102";}
+.glyphicon-leaf:before{content:"\e103";}
+.glyphicon-eye-open:before{content:"\e105";}
+.glyphicon-eye-close:before{content:"\e106";}
+.glyphicon-warning-sign:before{content:"\e107";}
+.glyphicon-plane:before{content:"\e108";}
+.glyphicon-random:before{content:"\e110";}
+.glyphicon-comment:before{content:"\e111";}
+.glyphicon-magnet:before{content:"\e112";}
+.glyphicon-chevron-up:before{content:"\e113";}
+.glyphicon-chevron-down:before{content:"\e114";}
+.glyphicon-retweet:before{content:"\e115";}
+.glyphicon-shopping-cart:before{content:"\e116";}
+.glyphicon-folder-close:before{content:"\e117";}
+.glyphicon-folder-open:before{content:"\e118";}
+.glyphicon-resize-vertical:before{content:"\e119";}
+.glyphicon-resize-horizontal:before{content:"\e120";}
+.glyphicon-hdd:before{content:"\e121";}
+.glyphicon-bullhorn:before{content:"\e122";}
+.glyphicon-certificate:before{content:"\e124";}
+.glyphicon-thumbs-up:before{content:"\e125";}
+.glyphicon-thumbs-down:before{content:"\e126";}
+.glyphicon-hand-right:before{content:"\e127";}
+.glyphicon-hand-left:before{content:"\e128";}
+.glyphicon-hand-up:before{content:"\e129";}
+.glyphicon-hand-down:before{content:"\e130";}
+.glyphicon-circle-arrow-right:before{content:"\e131";}
+.glyphicon-circle-arrow-left:before{content:"\e132";}
+.glyphicon-circle-arrow-up:before{content:"\e133";}
+.glyphicon-circle-arrow-down:before{content:"\e134";}
+.glyphicon-globe:before{content:"\e135";}
+.glyphicon-tasks:before{content:"\e137";}
+.glyphicon-filter:before{content:"\e138";}
+.glyphicon-fullscreen:before{content:"\e140";}
+.glyphicon-dashboard:before{content:"\e141";}
+.glyphicon-heart-empty:before{content:"\e143";}
+.glyphicon-link:before{content:"\e144";}
+.glyphicon-phone:before{content:"\e145";}
+.glyphicon-usd:before{content:"\e148";}
+.glyphicon-gbp:before{content:"\e149";}
+.glyphicon-sort:before{content:"\e150";}
+.glyphicon-sort-by-alphabet:before{content:"\e151";}
+.glyphicon-sort-by-alphabet-alt:before{content:"\e152";}
+.glyphicon-sort-by-order:before{content:"\e153";}
+.glyphicon-sort-by-order-alt:before{content:"\e154";}
+.glyphicon-sort-by-attributes:before{content:"\e155";}
+.glyphicon-sort-by-attributes-alt:before{content:"\e156";}
+.glyphicon-unchecked:before{content:"\e157";}
+.glyphicon-expand:before{content:"\e158";}
+.glyphicon-collapse-down:before{content:"\e159";}
+.glyphicon-collapse-up:before{content:"\e160";}
+.glyphicon-log-in:before{content:"\e161";}
+.glyphicon-flash:before{content:"\e162";}
+.glyphicon-log-out:before{content:"\e163";}
+.glyphicon-new-window:before{content:"\e164";}
+.glyphicon-record:before{content:"\e165";}
+.glyphicon-save:before{content:"\e166";}
+.glyphicon-open:before{content:"\e167";}
+.glyphicon-saved:before{content:"\e168";}
+.glyphicon-import:before{content:"\e169";}
+.glyphicon-export:before{content:"\e170";}
+.glyphicon-send:before{content:"\e171";}
+.glyphicon-floppy-disk:before{content:"\e172";}
+.glyphicon-floppy-saved:before{content:"\e173";}
+.glyphicon-floppy-remove:before{content:"\e174";}
+.glyphicon-floppy-save:before{content:"\e175";}
+.glyphicon-floppy-open:before{content:"\e176";}
+.glyphicon-credit-card:before{content:"\e177";}
+.glyphicon-transfer:before{content:"\e178";}
+.glyphicon-cutlery:before{content:"\e179";}
+.glyphicon-header:before{content:"\e180";}
+.glyphicon-compressed:before{content:"\e181";}
+.glyphicon-earphone:before{content:"\e182";}
+.glyphicon-phone-alt:before{content:"\e183";}
+.glyphicon-tower:before{content:"\e184";}
+.glyphicon-stats:before{content:"\e185";}
+.glyphicon-sd-video:before{content:"\e186";}
+.glyphicon-hd-video:before{content:"\e187";}
+.glyphicon-subtitles:before{content:"\e188";}
+.glyphicon-sound-stereo:before{content:"\e189";}
+.glyphicon-sound-dolby:before{content:"\e190";}
+.glyphicon-sound-5-1:before{content:"\e191";}
+.glyphicon-sound-6-1:before{content:"\e192";}
+.glyphicon-sound-7-1:before{content:"\e193";}
+.glyphicon-copyright-mark:before{content:"\e194";}
+.glyphicon-registration-mark:before{content:"\e195";}
+.glyphicon-cloud-download:before{content:"\e197";}
+.glyphicon-cloud-upload:before{content:"\e198";}
+.glyphicon-tree-conifer:before{content:"\e199";}
+.glyphicon-tree-deciduous:before{content:"\e200";}
+.glyphicon-briefcase:before{content:"\1f4bc";}
+.glyphicon-calendar:before{content:"\1f4c5";}
+.glyphicon-pushpin:before{content:"\1f4cc";}
+.glyphicon-paperclip:before{content:"\1f4ce";}
+.glyphicon-camera:before{content:"\1f4f7";}
+.glyphicon-lock:before{content:"\1f512";}
+.glyphicon-bell:before{content:"\1f514";}
+.glyphicon-bookmark:before{content:"\1f516";}
+.glyphicon-fire:before{content:"\1f525";}
+.glyphicon-wrench:before{content:"\1f527";}
+</style>
 
             <script>
                 L_NO_TOUCH = false;
@@ -54,14 +258,14 @@
 <body>
     
     
-            <div class="folium-map" id="map_3b53e90f772667b206c27b0b8b313365" ></div>
+            <div class="folium-map" id="map_359fbc4a34a0f64f80de8b8ffd09fa85" ></div>
         
 </body>
 <script>
     
     
-            var map_3b53e90f772667b206c27b0b8b313365 = L.map(
-                "map_3b53e90f772667b206c27b0b8b313365",
+            var map_359fbc4a34a0f64f80de8b8ffd09fa85 = L.map(
+                "map_359fbc4a34a0f64f80de8b8ffd09fa85",
                 {
                     center: [53.42968642083333, 14.542965508333332],
                     crs: L.CRS.EPSG3857,
@@ -73,13 +277,13 @@
 
                 }
             );
-            L.control.scale().addTo(map_3b53e90f772667b206c27b0b8b313365);
+            L.control.scale().addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
 
             
 
         
     
-            var tile_layer_78f693d5b520603f61ade59195016d82 = L.tileLayer(
+            var tile_layer_bd17a32b4ce97afdaaa42930c330242d = L.tileLayer(
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {
   "minZoom": 0,
@@ -96,34 +300,34 @@
             );
         
     
-            tile_layer_78f693d5b520603f61ade59195016d82.addTo(map_3b53e90f772667b206c27b0b8b313365);
+            tile_layer_bd17a32b4ce97afdaaa42930c330242d.addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-            var marker_5ed8950b7fadaac0d1451c0c5e69d2b4 = L.marker(
+            var marker_b3dafdd33448aed8785f9e253c4d0b0e = L.marker(
                 [53.4261406, 14.546218],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_5f647891c36f02febe72a25096ef833a = L.popup({
+        var popup_65117deaeb58e24e123f24a3763efc87 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_81e7bb059d6112a672b942687fd59eb1 = $(`<div id="html_81e7bb059d6112a672b942687fd59eb1" style="width: 100.0%; height: 100.0%;"><strong>Punkt 1 - Wjazd od Placu Zwyciestwa</strong><br>Kierunek: Plac Zwyciestwa -> Plac Zgody<br>Rola ruchowa: potencjalny doplyw do AWP<br>Wjazd od Placu Zwyciestwa.</div>`)[0];
-                popup_5f647891c36f02febe72a25096ef833a.setContent(html_81e7bb059d6112a672b942687fd59eb1);
+                var html_e7c5a6b3c56ff1aaf8cd0f5d693ee336 = $(`<div id="html_e7c5a6b3c56ff1aaf8cd0f5d693ee336" style="width: 100.0%; height: 100.0%;"><strong>Punkt 1 - Wjazd od Placu Zwyciestwa</strong><br>Kierunek: Plac Zwyciestwa -> Plac Zgody<br>Rola ruchowa: potencjalny doplyw do AWP<br>Wjazd od Placu Zwyciestwa.</div>`)[0];
+                popup_65117deaeb58e24e123f24a3763efc87.setContent(html_e7c5a6b3c56ff1aaf8cd0f5d693ee336);
             
         
 
-        marker_5ed8950b7fadaac0d1451c0c5e69d2b4.bindPopup(popup_5f647891c36f02febe72a25096ef833a)
+        marker_b3dafdd33448aed8785f9e253c4d0b0e.bindPopup(popup_65117deaeb58e24e123f24a3763efc87)
         ;
 
         
     
     
-            marker_5ed8950b7fadaac0d1451c0c5e69d2b4.bindTooltip(
+            marker_b3dafdd33448aed8785f9e253c4d0b0e.bindTooltip(
                 `<div>
                      1. Punkt 1 - Wjazd od Placu Zwyciestwa
                  </div>`,
@@ -133,31 +337,31 @@
             );
         
     
-            var marker_468d2a841fc44a5dfeda760fbd6a93fe = L.marker(
+            var marker_0021b8045323aaed425f9d4c4dabf594 = L.marker(
                 [53.4272511, 14.5451662],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_01ec32bc3d7cc044c62011cf6d085636 = L.popup({
+        var popup_624b8d0e0384bcf22c8ebceacf831a21 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_43e5ae8a7f50caa075efb3e61d44534d = $(`<div id="html_43e5ae8a7f50caa075efb3e61d44534d" style="width: 100.0%; height: 100.0%;"><strong>Punkt 2 - Miedzy Placem Zgody a wjazdem</strong><br>Kierunek: Plac Zwyciestwa -> Plac Zgody<br>Rola ruchowa: punkt korytarzowy<br>Miedzy Placem Zgody a wjazdem od Placu Zwyciestwa.</div>`)[0];
-                popup_01ec32bc3d7cc044c62011cf6d085636.setContent(html_43e5ae8a7f50caa075efb3e61d44534d);
+                var html_6aea8753333d795f990b4d3a8938f017 = $(`<div id="html_6aea8753333d795f990b4d3a8938f017" style="width: 100.0%; height: 100.0%;"><strong>Punkt 2 - Miedzy Placem Zgody a wjazdem</strong><br>Kierunek: Plac Zwyciestwa -> Plac Zgody<br>Rola ruchowa: punkt korytarzowy<br>Miedzy Placem Zgody a wjazdem od Placu Zwyciestwa.</div>`)[0];
+                popup_624b8d0e0384bcf22c8ebceacf831a21.setContent(html_6aea8753333d795f990b4d3a8938f017);
             
         
 
-        marker_468d2a841fc44a5dfeda760fbd6a93fe.bindPopup(popup_01ec32bc3d7cc044c62011cf6d085636)
+        marker_0021b8045323aaed425f9d4c4dabf594.bindPopup(popup_624b8d0e0384bcf22c8ebceacf831a21)
         ;
 
         
     
     
-            marker_468d2a841fc44a5dfeda760fbd6a93fe.bindTooltip(
+            marker_0021b8045323aaed425f9d4c4dabf594.bindTooltip(
                 `<div>
                      2. Punkt 2 - Miedzy Placem Zgody a wjazdem
                  </div>`,
@@ -167,31 +371,31 @@
             );
         
     
-            var marker_86c8a38482ba1a3d315f67976d088f9a = L.marker(
+            var marker_f692a6fcc8fc31fad2129d63cb655928 = L.marker(
                 [53.4284542, 14.544053],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_46eb873c19f13df037d812d743a1cfc4 = L.popup({
+        var popup_6956cbc2524a05f519d03df8fc507fa3 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_bb3ca9f3a467d2021a55b9f822170d07 = $(`<div id="html_bb3ca9f3a467d2021a55b9f822170d07" style="width: 100.0%; height: 100.0%;"><strong>Punkt 3 - Przed rondem Plac Zgody</strong><br>Kierunek: Plac Zwyciestwa -> Plac Zgody<br>Rola ruchowa: punkt korytarzowy<br>Przed rondem Plac Zgody od strony Placu Zwyciestwa.</div>`)[0];
-                popup_46eb873c19f13df037d812d743a1cfc4.setContent(html_bb3ca9f3a467d2021a55b9f822170d07);
+                var html_dd8a2dcf41089c86fae7fb33eeee7e44 = $(`<div id="html_dd8a2dcf41089c86fae7fb33eeee7e44" style="width: 100.0%; height: 100.0%;"><strong>Punkt 3 - Przed rondem Plac Zgody</strong><br>Kierunek: Plac Zwyciestwa -> Plac Zgody<br>Rola ruchowa: punkt korytarzowy<br>Przed rondem Plac Zgody od strony Placu Zwyciestwa.</div>`)[0];
+                popup_6956cbc2524a05f519d03df8fc507fa3.setContent(html_dd8a2dcf41089c86fae7fb33eeee7e44);
             
         
 
-        marker_86c8a38482ba1a3d315f67976d088f9a.bindPopup(popup_46eb873c19f13df037d812d743a1cfc4)
+        marker_f692a6fcc8fc31fad2129d63cb655928.bindPopup(popup_6956cbc2524a05f519d03df8fc507fa3)
         ;
 
         
     
     
-            marker_86c8a38482ba1a3d315f67976d088f9a.bindTooltip(
+            marker_f692a6fcc8fc31fad2129d63cb655928.bindTooltip(
                 `<div>
                      3. Punkt 3 - Przed rondem Plac Zgody
                  </div>`,
@@ -201,31 +405,31 @@
             );
         
     
-            var marker_7387bed57bdf35a8cb8026045a330d23 = L.marker(
+            var marker_4ff7d76691a7366b00cbfaee84147186 = L.marker(
                 [53.4288491, 14.5442334],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_5516df5f3404b6dd735a0bf532861421 = L.popup({
+        var popup_2e36b841a38aa0045c92ad7eb53283ca = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_9a2af54483f67efd1577bac940b78791 = $(`<div id="html_9a2af54483f67efd1577bac940b78791" style="width: 100.0%; height: 100.0%;"><strong>Punkt 4 - Wjazd na Plac Zgody z Baluki</strong><br>Kierunek: Baluki -> Plac Zgody<br>Rola ruchowa: potencjalny doplyw boczny<br>Wjazd na Plac Zgody z ulicy Baluki.</div>`)[0];
-                popup_5516df5f3404b6dd735a0bf532861421.setContent(html_9a2af54483f67efd1577bac940b78791);
+                var html_303da6d4047d2183a071f0239eef8834 = $(`<div id="html_303da6d4047d2183a071f0239eef8834" style="width: 100.0%; height: 100.0%;"><strong>Punkt 4 - Wjazd na Plac Zgody z Baluki</strong><br>Kierunek: Baluki -> Plac Zgody<br>Rola ruchowa: potencjalny doplyw boczny<br>Wjazd na Plac Zgody z ulicy Baluki.</div>`)[0];
+                popup_2e36b841a38aa0045c92ad7eb53283ca.setContent(html_303da6d4047d2183a071f0239eef8834);
             
         
 
-        marker_7387bed57bdf35a8cb8026045a330d23.bindPopup(popup_5516df5f3404b6dd735a0bf532861421)
+        marker_4ff7d76691a7366b00cbfaee84147186.bindPopup(popup_2e36b841a38aa0045c92ad7eb53283ca)
         ;
 
         
     
     
-            marker_7387bed57bdf35a8cb8026045a330d23.bindTooltip(
+            marker_4ff7d76691a7366b00cbfaee84147186.bindTooltip(
                 `<div>
                      4. Punkt 4 - Wjazd na Plac Zgody z Baluki
                  </div>`,
@@ -235,31 +439,31 @@
             );
         
     
-            var marker_8e2f637f9b42d910adf9f6e7c5baa852 = L.marker(
+            var marker_90b90eb1058f892e0e287e9386b97b44 = L.marker(
                 [53.4291775, 14.5433724],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_82bddcdc45eea4bb7e53f6df42782188 = L.popup({
+        var popup_57ec2bd63d19d4723e7e9786aa88beaf = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_5febb4331eab7ceb6b879976198029de = $(`<div id="html_5febb4331eab7ceb6b879976198029de" style="width: 100.0%; height: 100.0%;"><strong>Punkt 5 - Zjazd z Placu Zgody w kierunku Jagiellonskiej</strong><br>Kierunek: Plac Zgody -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>Zjazd z ronda Plac Zgody w kierunku Jagiellonskiej.</div>`)[0];
-                popup_82bddcdc45eea4bb7e53f6df42782188.setContent(html_5febb4331eab7ceb6b879976198029de);
+                var html_719c9c955fe1aec258dcef1e05cc35c3 = $(`<div id="html_719c9c955fe1aec258dcef1e05cc35c3" style="width: 100.0%; height: 100.0%;"><strong>Punkt 5 - Zjazd z Placu Zgody w kierunku Jagiellonskiej</strong><br>Kierunek: Plac Zgody -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>Zjazd z ronda Plac Zgody w kierunku Jagiellonskiej.</div>`)[0];
+                popup_57ec2bd63d19d4723e7e9786aa88beaf.setContent(html_719c9c955fe1aec258dcef1e05cc35c3);
             
         
 
-        marker_8e2f637f9b42d910adf9f6e7c5baa852.bindPopup(popup_82bddcdc45eea4bb7e53f6df42782188)
+        marker_90b90eb1058f892e0e287e9386b97b44.bindPopup(popup_57ec2bd63d19d4723e7e9786aa88beaf)
         ;
 
         
     
     
-            marker_8e2f637f9b42d910adf9f6e7c5baa852.bindTooltip(
+            marker_90b90eb1058f892e0e287e9386b97b44.bindTooltip(
                 `<div>
                      5. Punkt 5 - Zjazd z Placu Zgody w kierunku Jagiellonskiej
                  </div>`,
@@ -269,31 +473,31 @@
             );
         
     
-            var marker_738630700f966d72c1cca22934fe82b3 = L.marker(
+            var marker_e7b4cd0bbbe57ccface6b310a079e244 = L.marker(
                 [53.4303966, 14.5423856],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_805f397febe0bb4a5490e29bce0f5187 = L.popup({
+        var popup_d263291b98bb7f959d3638c8002382a2 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_a0ccf66dd1ed90de7f14a9473c2133c3 = $(`<div id="html_a0ccf66dd1ed90de7f14a9473c2133c3" style="width: 100.0%; height: 100.0%;"><strong>Punkt 6 - Pomiedzy Plac Zgody i Jagiellonska</strong><br>Kierunek: Plac Zgody -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Placem Zgody a Jagiellonska.</div>`)[0];
-                popup_805f397febe0bb4a5490e29bce0f5187.setContent(html_a0ccf66dd1ed90de7f14a9473c2133c3);
+                var html_e04dcae0852994e92ead1bd76d7114ac = $(`<div id="html_e04dcae0852994e92ead1bd76d7114ac" style="width: 100.0%; height: 100.0%;"><strong>Punkt 6 - Pomiedzy Plac Zgody i Jagiellonska</strong><br>Kierunek: Plac Zgody -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Placem Zgody a Jagiellonska.</div>`)[0];
+                popup_d263291b98bb7f959d3638c8002382a2.setContent(html_e04dcae0852994e92ead1bd76d7114ac);
             
         
 
-        marker_738630700f966d72c1cca22934fe82b3.bindPopup(popup_805f397febe0bb4a5490e29bce0f5187)
+        marker_e7b4cd0bbbe57ccface6b310a079e244.bindPopup(popup_d263291b98bb7f959d3638c8002382a2)
         ;
 
         
     
     
-            marker_738630700f966d72c1cca22934fe82b3.bindTooltip(
+            marker_e7b4cd0bbbe57ccface6b310a079e244.bindTooltip(
                 `<div>
                      6. Punkt 6 - Pomiedzy Plac Zgody i Jagiellonska
                  </div>`,
@@ -303,31 +507,31 @@
             );
         
     
-            var marker_8fb74bb9a26eafa96032084ed1b1f6d2 = L.marker(
+            var marker_9f29412b73a4b2344f0c15d034113c3a = L.marker(
                 [53.4313293, 14.5416835],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_f716f600d3238797321e72985e21a704 = L.popup({
+        var popup_7bc9fda924e5f7c41b2d51e90d1cfda9 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_352ae546f00c1a9a9807e255ecb0b288 = $(`<div id="html_352ae546f00c1a9a9807e255ecb0b288" style="width: 100.0%; height: 100.0%;"><strong>Punkt 7 - Przed Jagiellonska</strong><br>Kierunek: Plac Zgody -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>Przed skrzyzowaniem z Jagiellonska od strony Placu Zgody.</div>`)[0];
-                popup_f716f600d3238797321e72985e21a704.setContent(html_352ae546f00c1a9a9807e255ecb0b288);
+                var html_76b5ff676b6c071d78912db2b8123a1c = $(`<div id="html_76b5ff676b6c071d78912db2b8123a1c" style="width: 100.0%; height: 100.0%;"><strong>Punkt 7 - Przed Jagiellonska</strong><br>Kierunek: Plac Zgody -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>Przed skrzyzowaniem z Jagiellonska od strony Placu Zgody.</div>`)[0];
+                popup_7bc9fda924e5f7c41b2d51e90d1cfda9.setContent(html_76b5ff676b6c071d78912db2b8123a1c);
             
         
 
-        marker_8fb74bb9a26eafa96032084ed1b1f6d2.bindPopup(popup_f716f600d3238797321e72985e21a704)
+        marker_9f29412b73a4b2344f0c15d034113c3a.bindPopup(popup_7bc9fda924e5f7c41b2d51e90d1cfda9)
         ;
 
         
     
     
-            marker_8fb74bb9a26eafa96032084ed1b1f6d2.bindTooltip(
+            marker_9f29412b73a4b2344f0c15d034113c3a.bindTooltip(
                 `<div>
                      7. Punkt 7 - Przed Jagiellonska
                  </div>`,
@@ -337,31 +541,31 @@
             );
         
     
-            var marker_c722341acd7f929e55bf9f0886575bdf = L.marker(
+            var marker_3f4b13880d9856d63e6e57779ec092fb = L.marker(
                 [53.4320471, 14.5411119],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_853bdb3e88f54f0026a5c024b0b00376 = L.popup({
+        var popup_d10fe92b6db18c350c459fa3d912908f = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_7732bd04e978022e76dde9a01e2d5b3a = $(`<div id="html_7732bd04e978022e76dde9a01e2d5b3a" style="width: 100.0%; height: 100.0%;"><strong>Punkt 8 - Jagiellonska - Szarych Szeregow - posrodku</strong><br>Kierunek: Jagiellonska -> Plac Szarych Szeregow<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Jagiellonska a Placem Szarych Szeregow.</div>`)[0];
-                popup_853bdb3e88f54f0026a5c024b0b00376.setContent(html_7732bd04e978022e76dde9a01e2d5b3a);
+                var html_2a8b47621215494af732b975b3d59515 = $(`<div id="html_2a8b47621215494af732b975b3d59515" style="width: 100.0%; height: 100.0%;"><strong>Punkt 8 - Jagiellonska - Szarych Szeregow - posrodku</strong><br>Kierunek: Jagiellonska -> Plac Szarych Szeregow<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Jagiellonska a Placem Szarych Szeregow.</div>`)[0];
+                popup_d10fe92b6db18c350c459fa3d912908f.setContent(html_2a8b47621215494af732b975b3d59515);
             
         
 
-        marker_c722341acd7f929e55bf9f0886575bdf.bindPopup(popup_853bdb3e88f54f0026a5c024b0b00376)
+        marker_3f4b13880d9856d63e6e57779ec092fb.bindPopup(popup_d10fe92b6db18c350c459fa3d912908f)
         ;
 
         
     
     
-            marker_c722341acd7f929e55bf9f0886575bdf.bindTooltip(
+            marker_3f4b13880d9856d63e6e57779ec092fb.bindTooltip(
                 `<div>
                      8. Punkt 8 - Jagiellonska - Szarych Szeregow - posrodku
                  </div>`,
@@ -371,31 +575,31 @@
             );
         
     
-            var marker_375dad064d5543deb27cd2fbd910d6ab = L.marker(
+            var marker_9f6c044fd24c1f01ed3cfbbc0f4dbaa9 = L.marker(
                 [53.432813, 14.5405971],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_a0d8f6f3145acf9a7a93999f3d7dc821 = L.popup({
+        var popup_5258892b2c6998d1b14c3ee95ef867ab = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_1ea4113cb6c3fafd6ca6e654a0318ef4 = $(`<div id="html_1ea4113cb6c3fafd6ca6e654a0318ef4" style="width: 100.0%; height: 100.0%;"><strong>Punkt 9 - Wyjazd z AWP w Szarych Szeregow</strong><br>Kierunek: AWP -> Plac Szarych Szeregow<br>Rola ruchowa: potencjalny odplyw z AWP<br>Wyjazd z AWP w rejonie ronda Plac Szarych Szeregow.</div>`)[0];
-                popup_a0d8f6f3145acf9a7a93999f3d7dc821.setContent(html_1ea4113cb6c3fafd6ca6e654a0318ef4);
+                var html_2c96d974aa3249db8d14438eca2bc965 = $(`<div id="html_2c96d974aa3249db8d14438eca2bc965" style="width: 100.0%; height: 100.0%;"><strong>Punkt 9 - Wyjazd z AWP w Szarych Szeregow</strong><br>Kierunek: AWP -> Plac Szarych Szeregow<br>Rola ruchowa: potencjalny odplyw z AWP<br>Wyjazd z AWP w rejonie ronda Plac Szarych Szeregow.</div>`)[0];
+                popup_5258892b2c6998d1b14c3ee95ef867ab.setContent(html_2c96d974aa3249db8d14438eca2bc965);
             
         
 
-        marker_375dad064d5543deb27cd2fbd910d6ab.bindPopup(popup_a0d8f6f3145acf9a7a93999f3d7dc821)
+        marker_9f6c044fd24c1f01ed3cfbbc0f4dbaa9.bindPopup(popup_5258892b2c6998d1b14c3ee95ef867ab)
         ;
 
         
     
     
-            marker_375dad064d5543deb27cd2fbd910d6ab.bindTooltip(
+            marker_9f6c044fd24c1f01ed3cfbbc0f4dbaa9.bindTooltip(
                 `<div>
                      9. Punkt 9 - Wyjazd z AWP w Szarych Szeregow
                  </div>`,
@@ -405,31 +609,31 @@
             );
         
     
-            var marker_fc8b04d656d67aae21fab8a4297d3e3a = L.marker(
+            var marker_1e07e77facda86a07a138030b1baf489 = L.marker(
                 [53.4326876, 14.5404576],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_3d74b1ce64842b0c4f0861fa75513192 = L.popup({
+        var popup_eef32c6d544d36f30161968fd247f467 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_9bdf07ff0bde4ae940454fab89c82f1b = $(`<div id="html_9bdf07ff0bde4ae940454fab89c82f1b" style="width: 100.0%; height: 100.0%;"><strong>Punkt 10 - Wjazd w AWP z Szarych Szeregow</strong><br>Kierunek: Plac Szarych Szeregow -> AWP<br>Rola ruchowa: potencjalny doplyw do AWP<br>Wjazd w AWP z ronda Plac Szarych Szeregow.</div>`)[0];
-                popup_3d74b1ce64842b0c4f0861fa75513192.setContent(html_9bdf07ff0bde4ae940454fab89c82f1b);
+                var html_6e5b51b5c7b9dd967b50f50108da5043 = $(`<div id="html_6e5b51b5c7b9dd967b50f50108da5043" style="width: 100.0%; height: 100.0%;"><strong>Punkt 10 - Wjazd w AWP z Szarych Szeregow</strong><br>Kierunek: Plac Szarych Szeregow -> AWP<br>Rola ruchowa: potencjalny doplyw do AWP<br>Wjazd w AWP z ronda Plac Szarych Szeregow.</div>`)[0];
+                popup_eef32c6d544d36f30161968fd247f467.setContent(html_6e5b51b5c7b9dd967b50f50108da5043);
             
         
 
-        marker_fc8b04d656d67aae21fab8a4297d3e3a.bindPopup(popup_3d74b1ce64842b0c4f0861fa75513192)
+        marker_1e07e77facda86a07a138030b1baf489.bindPopup(popup_eef32c6d544d36f30161968fd247f467)
         ;
 
         
     
     
-            marker_fc8b04d656d67aae21fab8a4297d3e3a.bindTooltip(
+            marker_1e07e77facda86a07a138030b1baf489.bindTooltip(
                 `<div>
                      10. Punkt 10 - Wjazd w AWP z Szarych Szeregow
                  </div>`,
@@ -439,31 +643,31 @@
             );
         
     
-            var marker_7fc0bb7e01b9857911698d97ef2deb1f = L.marker(
+            var marker_f46aeaf0dc02c6c5dd678fbd36dba59a = L.marker(
                 [53.4319333, 14.5410317],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_b7d94f553ccd23c9daba459edf33cf9a = L.popup({
+        var popup_25f5937c08d3a81e7596f01f27b00261 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_377b4425d8b798328b5ac0381fa872df = $(`<div id="html_377b4425d8b798328b5ac0381fa872df" style="width: 100.0%; height: 100.0%;"><strong>Punkt 11 - Pomiedzy Szarych Szeregow a Jagiellonska</strong><br>Kierunek: Plac Szarych Szeregow -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Placem Szarych Szeregow a Jagiellonska.</div>`)[0];
-                popup_b7d94f553ccd23c9daba459edf33cf9a.setContent(html_377b4425d8b798328b5ac0381fa872df);
+                var html_962c4e126a164d1ca667442122f29956 = $(`<div id="html_962c4e126a164d1ca667442122f29956" style="width: 100.0%; height: 100.0%;"><strong>Punkt 11 - Pomiedzy Szarych Szeregow a Jagiellonska</strong><br>Kierunek: Plac Szarych Szeregow -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Placem Szarych Szeregow a Jagiellonska.</div>`)[0];
+                popup_25f5937c08d3a81e7596f01f27b00261.setContent(html_962c4e126a164d1ca667442122f29956);
             
         
 
-        marker_7fc0bb7e01b9857911698d97ef2deb1f.bindPopup(popup_b7d94f553ccd23c9daba459edf33cf9a)
+        marker_f46aeaf0dc02c6c5dd678fbd36dba59a.bindPopup(popup_25f5937c08d3a81e7596f01f27b00261)
         ;
 
         
     
     
-            marker_7fc0bb7e01b9857911698d97ef2deb1f.bindTooltip(
+            marker_f46aeaf0dc02c6c5dd678fbd36dba59a.bindTooltip(
                 `<div>
                      11. Punkt 11 - Pomiedzy Szarych Szeregow a Jagiellonska
                  </div>`,
@@ -473,31 +677,31 @@
             );
         
     
-            var marker_300775a1d34455d00474c6be6088cbba = L.marker(
+            var marker_24ee10c1593200cb7ecef4790eab96f7 = L.marker(
                 [53.4315929, 14.54132],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_63778990ac303adf92a9a54f60767616 = L.popup({
+        var popup_6e5fac9bb32c79ad579422188354bf60 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_4a46d19b8a500b1e33cc8a920534af93 = $(`<div id="html_4a46d19b8a500b1e33cc8a920534af93" style="width: 100.0%; height: 100.0%;"><strong>Punkt 12 - AWP-Jagiellonska przed skrzyzowaniem</strong><br>Kierunek: Plac Szarych Szeregow -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>AWP-Jagiellonska przed skrzyzowaniem.</div>`)[0];
-                popup_63778990ac303adf92a9a54f60767616.setContent(html_4a46d19b8a500b1e33cc8a920534af93);
+                var html_7a5b2e34d5208522ea28756a1c95d149 = $(`<div id="html_7a5b2e34d5208522ea28756a1c95d149" style="width: 100.0%; height: 100.0%;"><strong>Punkt 12 - AWP-Jagiellonska przed skrzyzowaniem</strong><br>Kierunek: Plac Szarych Szeregow -> Jagiellonska<br>Rola ruchowa: punkt korytarzowy<br>AWP-Jagiellonska przed skrzyzowaniem.</div>`)[0];
+                popup_6e5fac9bb32c79ad579422188354bf60.setContent(html_7a5b2e34d5208522ea28756a1c95d149);
             
         
 
-        marker_300775a1d34455d00474c6be6088cbba.bindPopup(popup_63778990ac303adf92a9a54f60767616)
+        marker_24ee10c1593200cb7ecef4790eab96f7.bindPopup(popup_6e5fac9bb32c79ad579422188354bf60)
         ;
 
         
     
     
-            marker_300775a1d34455d00474c6be6088cbba.bindTooltip(
+            marker_24ee10c1593200cb7ecef4790eab96f7.bindTooltip(
                 `<div>
                      12. Punkt 12 - AWP-Jagiellonska przed skrzyzowaniem
                  </div>`,
@@ -507,31 +711,31 @@
             );
         
     
-            var marker_28ac043d1dbac02f9d998d5dded77129 = L.marker(
+            var marker_9c954e54feb03f87677d43a438e40db3 = L.marker(
                 [53.4315034, 14.5410196],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_291f62c1cedc0b63042210c67237c11f = L.popup({
+        var popup_1e14ad452dcbb8d376a9e0457dffcc50 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_5f3e0e92ba7501e63b2167b30b404569 = $(`<div id="html_5f3e0e92ba7501e63b2167b30b404569" style="width: 100.0%; height: 100.0%;"><strong>Punkt 13 - Jagiellonska skrzyzowanie z AWP</strong><br>Kierunek: skrzyzowanie Jagiellonska/AWP<br>Rola ruchowa: punkt wezlowy do weryfikacji<br>Jagiellonska, skrzyzowanie z AWP; punkt do weryfikacji dopasowania segmentu TomTom.</div>`)[0];
-                popup_291f62c1cedc0b63042210c67237c11f.setContent(html_5f3e0e92ba7501e63b2167b30b404569);
+                var html_5543c7b0f384cfa2b7a7a66434ec8e32 = $(`<div id="html_5543c7b0f384cfa2b7a7a66434ec8e32" style="width: 100.0%; height: 100.0%;"><strong>Punkt 13 - Jagiellonska skrzyzowanie z AWP</strong><br>Kierunek: skrzyzowanie Jagiellonska/AWP<br>Rola ruchowa: punkt wezlowy do weryfikacji<br>Jagiellonska, skrzyzowanie z AWP; punkt do weryfikacji dopasowania segmentu TomTom.</div>`)[0];
+                popup_1e14ad452dcbb8d376a9e0457dffcc50.setContent(html_5543c7b0f384cfa2b7a7a66434ec8e32);
             
         
 
-        marker_28ac043d1dbac02f9d998d5dded77129.bindPopup(popup_291f62c1cedc0b63042210c67237c11f)
+        marker_9c954e54feb03f87677d43a438e40db3.bindPopup(popup_1e14ad452dcbb8d376a9e0457dffcc50)
         ;
 
         
     
     
-            marker_28ac043d1dbac02f9d998d5dded77129.bindTooltip(
+            marker_9c954e54feb03f87677d43a438e40db3.bindTooltip(
                 `<div>
                      13. Punkt 13 - Jagiellonska skrzyzowanie z AWP
                  </div>`,
@@ -541,31 +745,31 @@
             );
         
     
-            var marker_3e4d46fca440db656c9926db00137967 = L.marker(
+            var marker_6d08427ff9fbabf539aab7d6230cc9b6 = L.marker(
                 [53.4314043, 14.5419771],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_284115f6277159a64ceea9e6493a0291 = L.popup({
+        var popup_9922f6ad0da45fe0e5fec65be4c41050 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_3842c9774a2405b3eb48f3d98fb87598 = $(`<div id="html_3842c9774a2405b3eb48f3d98fb87598" style="width: 100.0%; height: 100.0%;"><strong>Punkt 14 - Jagiellonska za skrzyzowaniem z AWP</strong><br>Kierunek: Jagiellonska za skrzyzowaniem<br>Rola ruchowa: punkt wezlowy do weryfikacji<br>Jagiellonska za skrzyzowaniem z AWP; punkt do weryfikacji dopasowania segmentu TomTom.</div>`)[0];
-                popup_284115f6277159a64ceea9e6493a0291.setContent(html_3842c9774a2405b3eb48f3d98fb87598);
+                var html_2ba5c4738b09d941b345232b0cd560d1 = $(`<div id="html_2ba5c4738b09d941b345232b0cd560d1" style="width: 100.0%; height: 100.0%;"><strong>Punkt 14 - Jagiellonska za skrzyzowaniem z AWP</strong><br>Kierunek: Jagiellonska za skrzyzowaniem<br>Rola ruchowa: punkt wezlowy do weryfikacji<br>Jagiellonska za skrzyzowaniem z AWP; punkt do weryfikacji dopasowania segmentu TomTom.</div>`)[0];
+                popup_9922f6ad0da45fe0e5fec65be4c41050.setContent(html_2ba5c4738b09d941b345232b0cd560d1);
             
         
 
-        marker_3e4d46fca440db656c9926db00137967.bindPopup(popup_284115f6277159a64ceea9e6493a0291)
+        marker_6d08427ff9fbabf539aab7d6230cc9b6.bindPopup(popup_9922f6ad0da45fe0e5fec65be4c41050)
         ;
 
         
     
     
-            marker_3e4d46fca440db656c9926db00137967.bindTooltip(
+            marker_6d08427ff9fbabf539aab7d6230cc9b6.bindTooltip(
                 `<div>
                      14. Punkt 14 - Jagiellonska za skrzyzowaniem z AWP
                  </div>`,
@@ -575,31 +779,31 @@
             );
         
     
-            var marker_65f034b978085923cc8395d241a81c85 = L.marker(
+            var marker_1edc215d76c317145f2d87d505d62d8c = L.marker(
                 [53.4312589, 14.5415855],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_00f836b639194ea4d1bfed3b316e30c6 = L.popup({
+        var popup_8c20ecca7658aa6d5b0004b5207bccec = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_3a1dc45a2474a1bbf4da3904bf09d978 = $(`<div id="html_3a1dc45a2474a1bbf4da3904bf09d978" style="width: 100.0%; height: 100.0%;"><strong>Punkt 15 - Jagiellonska skrzyzowanie z AWP zjazd</strong><br>Kierunek: zjazd Jagiellonska/AWP<br>Rola ruchowa: punkt wezlowy do weryfikacji<br>Jagiellonska, skrzyzowanie z AWP, zjazd; punkt do weryfikacji dopasowania segmentu TomTom.</div>`)[0];
-                popup_00f836b639194ea4d1bfed3b316e30c6.setContent(html_3a1dc45a2474a1bbf4da3904bf09d978);
+                var html_2e503f71ed33d7a79c2a6c645ad38128 = $(`<div id="html_2e503f71ed33d7a79c2a6c645ad38128" style="width: 100.0%; height: 100.0%;"><strong>Punkt 15 - Jagiellonska skrzyzowanie z AWP zjazd</strong><br>Kierunek: zjazd Jagiellonska/AWP<br>Rola ruchowa: punkt wezlowy do weryfikacji<br>Jagiellonska, skrzyzowanie z AWP, zjazd; punkt do weryfikacji dopasowania segmentu TomTom.</div>`)[0];
+                popup_8c20ecca7658aa6d5b0004b5207bccec.setContent(html_2e503f71ed33d7a79c2a6c645ad38128);
             
         
 
-        marker_65f034b978085923cc8395d241a81c85.bindPopup(popup_00f836b639194ea4d1bfed3b316e30c6)
+        marker_1edc215d76c317145f2d87d505d62d8c.bindPopup(popup_8c20ecca7658aa6d5b0004b5207bccec)
         ;
 
         
     
     
-            marker_65f034b978085923cc8395d241a81c85.bindTooltip(
+            marker_1edc215d76c317145f2d87d505d62d8c.bindTooltip(
                 `<div>
                      15. Punkt 15 - Jagiellonska skrzyzowanie z AWP zjazd
                  </div>`,
@@ -609,31 +813,31 @@
             );
         
     
-            var marker_3ed46a04900731eabb75347c163357a8 = L.marker(
+            var marker_c02c4500d2f5f063ea60e93fcefcc01f = L.marker(
                 [53.4303748, 14.5422256],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_8f6cd155775806b5f4c5f7a72f0602e7 = L.popup({
+        var popup_80f49d6966ae18db5030e0c2a12767b9 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_0e5761d121ea6ab9a0203f25d8867607 = $(`<div id="html_0e5761d121ea6ab9a0203f25d8867607" style="width: 100.0%; height: 100.0%;"><strong>Punkt 16 - Posrodku Jagiellonska - Plac Zgody</strong><br>Kierunek: Jagiellonska -> Plac Zgody<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Jagiellonska a Placem Zgody.</div>`)[0];
-                popup_8f6cd155775806b5f4c5f7a72f0602e7.setContent(html_0e5761d121ea6ab9a0203f25d8867607);
+                var html_aabc793acc7a67182cdf3d4458bf6fca = $(`<div id="html_aabc793acc7a67182cdf3d4458bf6fca" style="width: 100.0%; height: 100.0%;"><strong>Punkt 16 - Posrodku Jagiellonska - Plac Zgody</strong><br>Kierunek: Jagiellonska -> Plac Zgody<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Jagiellonska a Placem Zgody.</div>`)[0];
+                popup_80f49d6966ae18db5030e0c2a12767b9.setContent(html_aabc793acc7a67182cdf3d4458bf6fca);
             
         
 
-        marker_3ed46a04900731eabb75347c163357a8.bindPopup(popup_8f6cd155775806b5f4c5f7a72f0602e7)
+        marker_c02c4500d2f5f063ea60e93fcefcc01f.bindPopup(popup_80f49d6966ae18db5030e0c2a12767b9)
         ;
 
         
     
     
-            marker_3ed46a04900731eabb75347c163357a8.bindTooltip(
+            marker_c02c4500d2f5f063ea60e93fcefcc01f.bindTooltip(
                 `<div>
                      16. Punkt 16 - Posrodku Jagiellonska - Plac Zgody
                  </div>`,
@@ -643,31 +847,31 @@
             );
         
     
-            var marker_16d25f1df7227b14ef16d1d8daec2cb6 = L.marker(
+            var marker_02d484def9323837e5ba8cdb5cefb8e8 = L.marker(
                 [53.4290468, 14.5433323],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_ecada3a9f77e3d36093fbf1da10c7e42 = L.popup({
+        var popup_e7fad95c23f6b40bcaaa56db0bdf5039 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_ca0e7d3d37d582cd1cc7d5587dbd5feb = $(`<div id="html_ca0e7d3d37d582cd1cc7d5587dbd5feb" style="width: 100.0%; height: 100.0%;"><strong>Punkt 17 - Przed Plac Zgody z kierunku Szarych Szeregow</strong><br>Kierunek: Jagiellonska -> Plac Zgody<br>Rola ruchowa: punkt korytarzowy<br>Przed Placem Zgody z kierunku Placu Szarych Szeregow.</div>`)[0];
-                popup_ecada3a9f77e3d36093fbf1da10c7e42.setContent(html_ca0e7d3d37d582cd1cc7d5587dbd5feb);
+                var html_f811fd3758f99c80b5314901fe87ed8b = $(`<div id="html_f811fd3758f99c80b5314901fe87ed8b" style="width: 100.0%; height: 100.0%;"><strong>Punkt 17 - Przed Plac Zgody z kierunku Szarych Szeregow</strong><br>Kierunek: Jagiellonska -> Plac Zgody<br>Rola ruchowa: punkt korytarzowy<br>Przed Placem Zgody z kierunku Placu Szarych Szeregow.</div>`)[0];
+                popup_e7fad95c23f6b40bcaaa56db0bdf5039.setContent(html_f811fd3758f99c80b5314901fe87ed8b);
             
         
 
-        marker_16d25f1df7227b14ef16d1d8daec2cb6.bindPopup(popup_ecada3a9f77e3d36093fbf1da10c7e42)
+        marker_02d484def9323837e5ba8cdb5cefb8e8.bindPopup(popup_e7fad95c23f6b40bcaaa56db0bdf5039)
         ;
 
         
     
     
-            marker_16d25f1df7227b14ef16d1d8daec2cb6.bindTooltip(
+            marker_02d484def9323837e5ba8cdb5cefb8e8.bindTooltip(
                 `<div>
                      17. Punkt 17 - Przed Plac Zgody z kierunku Szarych Szeregow
                  </div>`,
@@ -677,31 +881,31 @@
             );
         
     
-            var marker_6b1935bfeeeead0cee0cb41705be04c5 = L.marker(
+            var marker_eb33fbbe1865a877be9514e903abff7c = L.marker(
                 [53.4287751, 14.5430829],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_32e7cd37a6a24980caf6362bae8ba645 = L.popup({
+        var popup_2a65636f63c0e5faefc2a5598ebf4f25 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_26b7aabe96b3098231a80220953ee844 = $(`<div id="html_26b7aabe96b3098231a80220953ee844" style="width: 100.0%; height: 100.0%;"><strong>Punkt 18 - Zjazd z Placu Zgody Bohaterow Getta</strong><br>Kierunek: Plac Zgody -> Bohaterow Getta<br>Rola ruchowa: potencjalny odplyw boczny<br>Zjazd z Placu Zgody w ulice Bohaterow Getta Warszawskiego.</div>`)[0];
-                popup_32e7cd37a6a24980caf6362bae8ba645.setContent(html_26b7aabe96b3098231a80220953ee844);
+                var html_dc04de325ba5d684c7cbb2aec7fdc275 = $(`<div id="html_dc04de325ba5d684c7cbb2aec7fdc275" style="width: 100.0%; height: 100.0%;"><strong>Punkt 18 - Zjazd z Placu Zgody Bohaterow Getta</strong><br>Kierunek: Plac Zgody -> Bohaterow Getta<br>Rola ruchowa: potencjalny odplyw boczny<br>Zjazd z Placu Zgody w ulice Bohaterow Getta Warszawskiego.</div>`)[0];
+                popup_2a65636f63c0e5faefc2a5598ebf4f25.setContent(html_dc04de325ba5d684c7cbb2aec7fdc275);
             
         
 
-        marker_6b1935bfeeeead0cee0cb41705be04c5.bindPopup(popup_32e7cd37a6a24980caf6362bae8ba645)
+        marker_eb33fbbe1865a877be9514e903abff7c.bindPopup(popup_2a65636f63c0e5faefc2a5598ebf4f25)
         ;
 
         
     
     
-            marker_6b1935bfeeeead0cee0cb41705be04c5.bindTooltip(
+            marker_eb33fbbe1865a877be9514e903abff7c.bindTooltip(
                 `<div>
                      18. Punkt 18 - Zjazd z Placu Zgody Bohaterow Getta
                  </div>`,
@@ -711,31 +915,31 @@
             );
         
     
-            var marker_42b82ffb349dde47fe295bb2e50283ce = L.marker(
+            var marker_07aca978e4b902eb4cf12f738c1733c2 = L.marker(
                 [53.428406, 14.5435364],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_5875d76f26b7ac1946dbd898830b34b7 = L.popup({
+        var popup_9b26c35b11f2efe1f70e0c7580fd6e4e = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_f9bf28d954724d4bec4f77467c62d2de = $(`<div id="html_f9bf28d954724d4bec4f77467c62d2de" style="width: 100.0%; height: 100.0%;"><strong>Punkt 19 - Zjazd z Placu Zgody w Boguslawa X</strong><br>Kierunek: Plac Zgody -> Boguslawa X<br>Rola ruchowa: potencjalny odplyw boczny<br>Zjazd z Placu Zgody w ulice Boguslawa X.</div>`)[0];
-                popup_5875d76f26b7ac1946dbd898830b34b7.setContent(html_f9bf28d954724d4bec4f77467c62d2de);
+                var html_b6cc71e96fe7cfd2bba14e4fa5b92f84 = $(`<div id="html_b6cc71e96fe7cfd2bba14e4fa5b92f84" style="width: 100.0%; height: 100.0%;"><strong>Punkt 19 - Zjazd z Placu Zgody w Boguslawa X</strong><br>Kierunek: Plac Zgody -> Boguslawa X<br>Rola ruchowa: potencjalny odplyw boczny<br>Zjazd z Placu Zgody w ulice Boguslawa X.</div>`)[0];
+                popup_9b26c35b11f2efe1f70e0c7580fd6e4e.setContent(html_b6cc71e96fe7cfd2bba14e4fa5b92f84);
             
         
 
-        marker_42b82ffb349dde47fe295bb2e50283ce.bindPopup(popup_5875d76f26b7ac1946dbd898830b34b7)
+        marker_07aca978e4b902eb4cf12f738c1733c2.bindPopup(popup_9b26c35b11f2efe1f70e0c7580fd6e4e)
         ;
 
         
     
     
-            marker_42b82ffb349dde47fe295bb2e50283ce.bindTooltip(
+            marker_07aca978e4b902eb4cf12f738c1733c2.bindTooltip(
                 `<div>
                      19. Punkt 19 - Zjazd z Placu Zgody w Boguslawa X
                  </div>`,
@@ -745,31 +949,31 @@
             );
         
     
-            var marker_5fee997acbd01c52b03ac2d871df666e = L.marker(
+            var marker_c7446af72fe701be4406939c14f61e66 = L.marker(
                 [53.4283676, 14.543637],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_f4eac97935042993d0365f34f5ecffdb = L.popup({
+        var popup_2a367acc6f3e41cf32b9833a101d8217 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_a239ca1032f6226f3af0ba8d85eb1e9c = $(`<div id="html_a239ca1032f6226f3af0ba8d85eb1e9c" style="width: 100.0%; height: 100.0%;"><strong>Punkt 20 - Wjazd na rondo Plac Zgody ze strony Boguslawa X</strong><br>Kierunek: Boguslawa X -> Plac Zgody<br>Rola ruchowa: potencjalny doplyw boczny<br>Wjazd na rondo Plac Zgody ze strony ulicy Boguslawa X.</div>`)[0];
-                popup_f4eac97935042993d0365f34f5ecffdb.setContent(html_a239ca1032f6226f3af0ba8d85eb1e9c);
+                var html_fc6ab86408ca103546c91ad84dad8833 = $(`<div id="html_fc6ab86408ca103546c91ad84dad8833" style="width: 100.0%; height: 100.0%;"><strong>Punkt 20 - Wjazd na rondo Plac Zgody ze strony Boguslawa X</strong><br>Kierunek: Boguslawa X -> Plac Zgody<br>Rola ruchowa: potencjalny doplyw boczny<br>Wjazd na rondo Plac Zgody ze strony ulicy Boguslawa X.</div>`)[0];
+                popup_2a367acc6f3e41cf32b9833a101d8217.setContent(html_fc6ab86408ca103546c91ad84dad8833);
             
         
 
-        marker_5fee997acbd01c52b03ac2d871df666e.bindPopup(popup_f4eac97935042993d0365f34f5ecffdb)
+        marker_c7446af72fe701be4406939c14f61e66.bindPopup(popup_2a367acc6f3e41cf32b9833a101d8217)
         ;
 
         
     
     
-            marker_5fee997acbd01c52b03ac2d871df666e.bindTooltip(
+            marker_c7446af72fe701be4406939c14f61e66.bindTooltip(
                 `<div>
                      20. Punkt 20 - Wjazd na rondo Plac Zgody ze strony Boguslawa X
                  </div>`,
@@ -779,31 +983,31 @@
             );
         
     
-            var marker_bf9cd811d6739d5772978491a049152f = L.marker(
+            var marker_2cdcf062c6e5fe5396d20df221dc9535 = L.marker(
                 [53.4284112, 14.5439274],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_760fc7338a893bac9852f01dc546596a = L.popup({
+        var popup_631e1ed48419a84294de8b867c0d76e1 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_a5fda1b01958e7faf7a28d1a6859a599 = $(`<div id="html_a5fda1b01958e7faf7a28d1a6859a599" style="width: 100.0%; height: 100.0%;"><strong>Punkt 21 - Wyjazd z ronda Plac Zgody w AWP</strong><br>Kierunek: Plac Zgody -> Plac Zwyciestwa<br>Rola ruchowa: punkt korytarzowy<br>Wyjazd z ronda Plac Zgody w AWP w kierunku Placu Zwyciestwa.</div>`)[0];
-                popup_760fc7338a893bac9852f01dc546596a.setContent(html_a5fda1b01958e7faf7a28d1a6859a599);
+                var html_fd3846ac48cbf612b18e020fcadb998a = $(`<div id="html_fd3846ac48cbf612b18e020fcadb998a" style="width: 100.0%; height: 100.0%;"><strong>Punkt 21 - Wyjazd z ronda Plac Zgody w AWP</strong><br>Kierunek: Plac Zgody -> Plac Zwyciestwa<br>Rola ruchowa: punkt korytarzowy<br>Wyjazd z ronda Plac Zgody w AWP w kierunku Placu Zwyciestwa.</div>`)[0];
+                popup_631e1ed48419a84294de8b867c0d76e1.setContent(html_fd3846ac48cbf612b18e020fcadb998a);
             
         
 
-        marker_bf9cd811d6739d5772978491a049152f.bindPopup(popup_760fc7338a893bac9852f01dc546596a)
+        marker_2cdcf062c6e5fe5396d20df221dc9535.bindPopup(popup_631e1ed48419a84294de8b867c0d76e1)
         ;
 
         
     
     
-            marker_bf9cd811d6739d5772978491a049152f.bindTooltip(
+            marker_2cdcf062c6e5fe5396d20df221dc9535.bindTooltip(
                 `<div>
                      21. Punkt 21 - Wyjazd z ronda Plac Zgody w AWP
                  </div>`,
@@ -813,31 +1017,31 @@
             );
         
     
-            var marker_dfa3095724201cb7bf2ad789a1bcf69b = L.marker(
+            var marker_80cb494c9366cf17d06a4dc91c20d8d7 = L.marker(
                 [53.4272455, 14.5450589],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_4d041bd490e450d6827ea6e3935accf7 = L.popup({
+        var popup_1e58e9f7f987f117d1770734b3218c5a = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_214a2f8b24ccea2a4e89e404129684b5 = $(`<div id="html_214a2f8b24ccea2a4e89e404129684b5" style="width: 100.0%; height: 100.0%;"><strong>Punkt 22 - Plac Zgody - Plac Zwyciestwa - posrodku</strong><br>Kierunek: Plac Zgody -> Plac Zwyciestwa<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Placem Zgody a Placem Zwyciestwa.</div>`)[0];
-                popup_4d041bd490e450d6827ea6e3935accf7.setContent(html_214a2f8b24ccea2a4e89e404129684b5);
+                var html_2d649def70766da7548e58e9419002f9 = $(`<div id="html_2d649def70766da7548e58e9419002f9" style="width: 100.0%; height: 100.0%;"><strong>Punkt 22 - Plac Zgody - Plac Zwyciestwa - posrodku</strong><br>Kierunek: Plac Zgody -> Plac Zwyciestwa<br>Rola ruchowa: punkt korytarzowy<br>Odcinek pomiedzy Placem Zgody a Placem Zwyciestwa.</div>`)[0];
+                popup_1e58e9f7f987f117d1770734b3218c5a.setContent(html_2d649def70766da7548e58e9419002f9);
             
         
 
-        marker_dfa3095724201cb7bf2ad789a1bcf69b.bindPopup(popup_4d041bd490e450d6827ea6e3935accf7)
+        marker_80cb494c9366cf17d06a4dc91c20d8d7.bindPopup(popup_1e58e9f7f987f117d1770734b3218c5a)
         ;
 
         
     
     
-            marker_dfa3095724201cb7bf2ad789a1bcf69b.bindTooltip(
+            marker_80cb494c9366cf17d06a4dc91c20d8d7.bindTooltip(
                 `<div>
                      22. Punkt 22 - Plac Zgody - Plac Zwyciestwa - posrodku
                  </div>`,
@@ -847,31 +1051,31 @@
             );
         
     
-            var marker_a111c146c056a0cc23f36fd2891509bf = L.marker(
+            var marker_271d4966d3d23dced5b7939f0c62c80e = L.marker(
                 [53.4261875, 14.545826],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_29817a20548c7ebd1adc1df4af3c3425 = L.popup({
+        var popup_6042169b296f20e466cfbfaec4ee55d0 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_ea452c4ea148c0fb71724198daa2b0e8 = $(`<div id="html_ea452c4ea148c0fb71724198daa2b0e8" style="width: 100.0%; height: 100.0%;"><strong>Punkt 23 - Wyjazd z AWP Plac Zwyciestwa</strong><br>Kierunek: AWP -> Plac Zwyciestwa<br>Rola ruchowa: potencjalny odplyw z AWP<br>Wyjazd z AWP w kierunku Placu Zwyciestwa.</div>`)[0];
-                popup_29817a20548c7ebd1adc1df4af3c3425.setContent(html_ea452c4ea148c0fb71724198daa2b0e8);
+                var html_4c159d81c00110e0bce805cef5248fe3 = $(`<div id="html_4c159d81c00110e0bce805cef5248fe3" style="width: 100.0%; height: 100.0%;"><strong>Punkt 23 - Wyjazd z AWP Plac Zwyciestwa</strong><br>Kierunek: AWP -> Plac Zwyciestwa<br>Rola ruchowa: potencjalny odplyw z AWP<br>Wyjazd z AWP w kierunku Placu Zwyciestwa.</div>`)[0];
+                popup_6042169b296f20e466cfbfaec4ee55d0.setContent(html_4c159d81c00110e0bce805cef5248fe3);
             
         
 
-        marker_a111c146c056a0cc23f36fd2891509bf.bindPopup(popup_29817a20548c7ebd1adc1df4af3c3425)
+        marker_271d4966d3d23dced5b7939f0c62c80e.bindPopup(popup_6042169b296f20e466cfbfaec4ee55d0)
         ;
 
         
     
     
-            marker_a111c146c056a0cc23f36fd2891509bf.bindTooltip(
+            marker_271d4966d3d23dced5b7939f0c62c80e.bindTooltip(
                 `<div>
                      23. Punkt 23 - Wyjazd z AWP Plac Zwyciestwa
                  </div>`,
@@ -881,31 +1085,31 @@
             );
         
     
-            var marker_1feb0d0e5c053f4ec12681858fa0fa39 = L.marker(
+            var marker_f6bea5fa79ba08a9d06353a0151eaad9 = L.marker(
                 [53.4288207, 14.5443331],
                 {
 }
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-        var popup_252f4f22765434080135e86bad73ea3e = L.popup({
+        var popup_b5dd66c000001ccc5a078b71060cb219 = L.popup({
   "maxWidth": 320,
 });
 
         
             
-                var html_e2fa0869532e034683ff923423773c0a = $(`<div id="html_e2fa0869532e034683ff923423773c0a" style="width: 100.0%; height: 100.0%;"><strong>Punkt 24 - Z Placu Zgody w Baluki</strong><br>Kierunek: Plac Zgody -> Baluki<br>Rola ruchowa: potencjalny odplyw boczny<br>Zjazd z Placu Zgody w ulice Baluki.</div>`)[0];
-                popup_252f4f22765434080135e86bad73ea3e.setContent(html_e2fa0869532e034683ff923423773c0a);
+                var html_afcbc9feb5372ac7a5c51d9364c180fe = $(`<div id="html_afcbc9feb5372ac7a5c51d9364c180fe" style="width: 100.0%; height: 100.0%;"><strong>Punkt 24 - Z Placu Zgody w Baluki</strong><br>Kierunek: Plac Zgody -> Baluki<br>Rola ruchowa: potencjalny odplyw boczny<br>Zjazd z Placu Zgody w ulice Baluki.</div>`)[0];
+                popup_b5dd66c000001ccc5a078b71060cb219.setContent(html_afcbc9feb5372ac7a5c51d9364c180fe);
             
         
 
-        marker_1feb0d0e5c053f4ec12681858fa0fa39.bindPopup(popup_252f4f22765434080135e86bad73ea3e)
+        marker_f6bea5fa79ba08a9d06353a0151eaad9.bindPopup(popup_b5dd66c000001ccc5a078b71060cb219)
         ;
 
         
     
     
-            marker_1feb0d0e5c053f4ec12681858fa0fa39.bindTooltip(
+            marker_f6bea5fa79ba08a9d06353a0151eaad9.bindTooltip(
                 `<div>
                      24. Punkt 24 - Z Placu Zgody w Baluki
                  </div>`,
@@ -915,13 +1119,13 @@
             );
         
     
-            var poly_line_4ef648c074323d2d8127bf3a526a1a60 = L.polyline(
+            var poly_line_cdf682f637ceeebfcce1d45e76efee40 = L.polyline(
                 [[53.4261406, 14.546218], [53.4272511, 14.5451662], [53.4284542, 14.544053], [53.4288491, 14.5442334], [53.4291775, 14.5433724], [53.4303966, 14.5423856], [53.4313293, 14.5416835], [53.4320471, 14.5411119], [53.432813, 14.5405971], [53.4326876, 14.5404576], [53.4319333, 14.5410317], [53.4315929, 14.54132], [53.4315034, 14.5410196], [53.4314043, 14.5419771], [53.4312589, 14.5415855], [53.4303748, 14.5422256], [53.4290468, 14.5433323], [53.4287751, 14.5430829], [53.428406, 14.5435364], [53.4283676, 14.543637], [53.4284112, 14.5439274], [53.4272455, 14.5450589], [53.4261875, 14.545826], [53.4288207, 14.5443331]],
                 {"bubblingMouseEvents": true, "color": "#2563eb", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#2563eb", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.75, "smoothFactor": 1.0, "stroke": true, "weight": 4}
-            ).addTo(map_3b53e90f772667b206c27b0b8b313365);
+            ).addTo(map_359fbc4a34a0f64f80de8b8ffd09fa85);
         
     
-            poly_line_4ef648c074323d2d8127bf3a526a1a60.bindTooltip(
+            poly_line_cdf682f637ceeebfcce1d45e76efee40.bindTooltip(
                 `<div>
                      Os pomiarowa al. Wojska Polskiego
                  </div>`,
